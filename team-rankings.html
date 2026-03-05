@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NFL Team Rankings</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --card: #111827;
+    --card2: #1a2235;
+    --border: #1e2d45;
+    --blue: #3b82f6;
+    --sky: #38bdf8;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --dim: #94a3b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Sans 3', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  .site-nav {
+    background: #080c14;
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .site-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+  }
+  .site-nav a:hover { color: var(--text); background: var(--card); }
+  .site-nav a.active { color: var(--sky); }
+  .site-nav .logo {
+    color: var(--sky);
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    margin-right: 16px;
+    text-decoration: none;
+  }
+
+  /* ── HEADER ── */
+  .page-header {
+    padding: 32px 24px 0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .page-header h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .page-header h1 span { color: var(--sky); }
+
+  /* ── CONTROLS BAR ── */
+  .controls {
+    max-width: 1400px;
+    margin: 20px auto 0;
+    padding: 0 24px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .control-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .season-tabs {
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .season-tabs button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    border-right: 1px solid var(--border);
+  }
+  .season-tabs button:last-child { border-right: none; }
+  .season-tabs button:hover { background: var(--card2); color: var(--text); }
+  .season-tabs button.active { background: var(--blue); color: #fff; }
+
+  select {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    padding: 7px 32px 7px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    min-width: 160px;
+  }
+  select:focus { outline: none; border-color: var(--blue); }
+
+  /* ── CATEGORY TABS ── */
+  .category-bar {
+    max-width: 1400px;
+    margin: 20px auto 0;
+    padding: 0 24px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .cat-tab {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .cat-tab:hover { color: var(--text); border-color: var(--muted); }
+  .cat-tab.active { color: #fff; border-color: transparent; }
+  .cat-tab[data-group="offense"].active { background: var(--blue); }
+  .cat-tab[data-group="defense"].active { background: #7c3aed; }
+  .cat-tab[data-group="scoring"].active { background: var(--green); color: #000; }
+
+  /* ── RANKINGS TABLE ── */
+  .rankings-wrap {
+    max-width: 1400px;
+    margin: 20px auto 40px;
+    padding: 0 24px;
+  }
+
+  .stat-title-bar {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .stat-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .stat-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .rankings-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .rankings-table thead tr {
+    background: #0d1626;
+    border-bottom: 1px solid var(--border);
+  }
+  .rankings-table th {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 11px 16px;
+    text-align: left;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .rankings-table th:hover { color: var(--text); }
+  .rankings-table th.sort-asc::after { content: ' ↑'; color: var(--sky); }
+  .rankings-table th.sort-desc::after { content: ' ↓'; color: var(--sky); }
+  .rankings-table th.primary-col { color: var(--sky); }
+
+  .rankings-table tbody tr {
+    border-bottom: 1px solid #0f1a2e;
+    transition: background 0.1s;
+  }
+  .rankings-table tbody tr:last-child { border-bottom: none; }
+  .rankings-table tbody tr:hover { background: var(--card2); }
+
+  .rankings-table td {
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+
+  .rank-cell {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--muted);
+    width: 40px;
+  }
+  .rank-1 { color: #fbbf24; }
+  .rank-2 { color: #94a3b8; }
+  .rank-3 { color: #b45309; }
+
+  .team-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .team-abbr {
+    font-family: 'Oswald', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.04em;
+    min-width: 36px;
+  }
+  .conf-badge {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .conf-afc { background: #3f1e1e; color: #f87171; }
+  .conf-nfc { background: #1e3a5f; color: var(--sky); }
+
+  .primary-val {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .bar-cell { min-width: 140px; }
+  .stat-bar-bg {
+    background: #0d1626;
+    border-radius: 3px;
+    height: 6px;
+    overflow: hidden;
+    width: 120px;
+  }
+  .stat-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .bar-offense { background: var(--blue); }
+  .bar-defense { background: #7c3aed; }
+  .bar-scoring-good { background: var(--green); }
+  .bar-scoring-bad { background: var(--red); }
+
+  .secondary-val {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .good { color: var(--green); }
+  .bad  { color: var(--red); }
+
+  /* ── DUAL TABLE LAYOUT ── */
+  .dual-tables {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .table-panel h3 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-left: 4px;
+  }
+  .table-panel.offense h3 { color: var(--blue); }
+  .table-panel.defense h3 { color: #a78bfa; }
+
+  @media (max-width: 900px) {
+    .dual-tables { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a href="#" class="logo">NFL ANALYTICS</a>
+  <a href="nfl-dashboard.html">Dashboard</a>
+  <a href="player-props.html">Player Props</a>
+  <a href="team-rankings.html" class="active">Team Rankings</a>
+</nav>
+
+<div class="page-header">
+  <h1>Team <span>Rankings</span></h1>
+</div>
+
+<div class="controls">
+  <div class="control-group">
+    <div class="control-label">Season</div>
+    <div class="season-tabs" id="seasonTabs">
+      <button data-season="2025" class="active">2025</button>
+      <button data-season="2024">2024</button>
+      <button data-season="2023">2023</button>
+      <button data-season="2022">2022</button>
+      <button data-season="2021">2021</button>
+      <button data-season="2020">2020</button>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <div class="control-label">Conference</div>
+    <select id="confFilter">
+      <option value="ALL">All Teams</option>
+      <option value="AFC">AFC</option>
+      <option value="NFC">NFC</option>
+    </select>
+  </div>
+</div>
+
+<div class="category-bar" id="categoryBar">
+  <button class="cat-tab active" data-cat="scoring" data-group="scoring">Scoring</button>
+  <button class="cat-tab" data-cat="rush_off" data-group="offense">Rush Offense</button>
+  <button class="cat-tab" data-cat="pass_off" data-group="offense">Pass Offense</button>
+  <button class="cat-tab" data-cat="rush_def" data-group="defense">Rush Defense</button>
+  <button class="cat-tab" data-cat="pass_def" data-group="defense">Pass Defense</button>
+  <button class="cat-tab" data-cat="turnovers" data-group="defense">Turnovers</button>
+</div>
+
+<div class="rankings-wrap" id="rankingsWrap">
+  <!-- injected by JS -->
+</div>
+
+
+<script>
+const TEAM_STATS_DATA = [{"season": 2020, "team": "ARI", "points_for": 410, "points_against": 367, "games_played": 16, "rush_yards": 2237, "rush_tds": 22, "rush_carries": 479, "pass_yards": 4076, "pass_tds": 27, "pass_attempts": 574, "completions": 386, "interceptions": 13, "pass_epa": 18.491688154992676, "rush_yards_allowed": 2008, "rush_tds_allowed": 13, "pass_yards_allowed": 3937, "pass_tds_allowed": 25, "interceptions_forced": 11, "rush_ypg": 139.8, "rush_ypg_allowed": 125.5, "pass_ypg": 254.8, "pass_ypg_allowed": 246.1, "ppg": 25.6, "ppg_against": 22.9, "completion_pct": 67.2}, {"season": 2020, "team": "ATL", "points_for": 396, "points_against": 414, "games_played": 16, "rush_yards": 1532, "rush_tds": 13, "rush_carries": 409, "pass_yards": 4581, "pass_tds": 26, "pass_attempts": 626, "completions": 407, "interceptions": 11, "pass_epa": 67.56989281225401, "rush_yards_allowed": 1677, "rush_tds_allowed": 15, "pass_yards_allowed": 4453, "pass_tds_allowed": 32, "interceptions_forced": 11, "rush_ypg": 95.8, "rush_ypg_allowed": 104.8, "pass_ypg": 286.3, "pass_ypg_allowed": 278.3, "ppg": 24.8, "ppg_against": 25.9, "completion_pct": 65.0}, {"season": 2020, "team": "BAL", "points_for": 468, "points_against": 303, "games_played": 16, "rush_yards": 3071, "rush_tds": 24, "rush_carries": 555, "pass_yards": 2904, "pass_tds": 27, "pass_attempts": 405, "completions": 256, "interceptions": 11, "pass_epa": 35.67021694947083, "rush_yards_allowed": 1740, "rush_tds_allowed": 12, "pass_yards_allowed": 3772, "pass_tds_allowed": 21, "interceptions_forced": 10, "rush_ypg": 191.9, "rush_ypg_allowed": 108.8, "pass_ypg": 181.5, "pass_ypg_allowed": 235.8, "ppg": 29.2, "ppg_against": 18.9, "completion_pct": 63.2}, {"season": 2020, "team": "BUF", "points_for": 501, "points_against": 375, "games_played": 16, "rush_yards": 1723, "rush_tds": 16, "rush_carries": 411, "pass_yards": 4741, "pass_tds": 38, "pass_attempts": 593, "completions": 407, "interceptions": 11, "pass_epa": 169.05038366682504, "rush_yards_allowed": 1914, "rush_tds_allowed": 21, "pass_yards_allowed": 3914, "pass_tds_allowed": 23, "interceptions_forced": 15, "rush_ypg": 107.7, "rush_ypg_allowed": 119.6, "pass_ypg": 296.3, "pass_ypg_allowed": 244.6, "ppg": 31.3, "ppg_against": 23.4, "completion_pct": 68.6}, {"season": 2020, "team": "CAR", "points_for": 350, "points_against": 402, "games_played": 16, "rush_yards": 1704, "rush_tds": 19, "rush_carries": 407, "pass_yards": 4101, "pass_tds": 16, "pass_attempts": 548, "completions": 372, "interceptions": 16, "pass_epa": 11.171428627835471, "rush_yards_allowed": 1936, "rush_tds_allowed": 17, "pass_yards_allowed": 4024, "pass_tds_allowed": 28, "interceptions_forced": 7, "rush_ypg": 106.5, "rush_ypg_allowed": 121.0, "pass_ypg": 256.3, "pass_ypg_allowed": 251.5, "ppg": 21.9, "ppg_against": 25.1, "completion_pct": 67.9}, {"season": 2020, "team": "CHI", "points_for": 372, "points_against": 370, "games_played": 16, "rush_yards": 1647, "rush_tds": 12, "rush_carries": 393, "pass_yards": 3925, "pass_tds": 26, "pass_attempts": 614, "completions": 402, "interceptions": 16, "pass_epa": -7.061996568792957, "rush_yards_allowed": 1814, "rush_tds_allowed": 11, "pass_yards_allowed": 3939, "pass_tds_allowed": 28, "interceptions_forced": 10, "rush_ypg": 102.9, "rush_ypg_allowed": 113.4, "pass_ypg": 245.3, "pass_ypg_allowed": 246.2, "ppg": 23.2, "ppg_against": 23.1, "completion_pct": 65.5}, {"season": 2020, "team": "CIN", "points_for": 311, "points_against": 424, "games_played": 16, "rush_yards": 1668, "rush_tds": 13, "rush_carries": 411, "pass_yards": 3777, "pass_tds": 19, "pass_attempts": 578, "completions": 371, "interceptions": 11, "pass_epa": 15.323430251615456, "rush_yards_allowed": 2368, "rush_tds_allowed": 13, "pass_yards_allowed": 3923, "pass_tds_allowed": 32, "interceptions_forced": 11, "rush_ypg": 104.2, "rush_ypg_allowed": 148.0, "pass_ypg": 236.1, "pass_ypg_allowed": 245.2, "ppg": 19.4, "ppg_against": 26.5, "completion_pct": 64.2}, {"season": 2020, "team": "CLE", "points_for": 408, "points_against": 419, "games_played": 16, "rush_yards": 2374, "rush_tds": 21, "rush_carries": 495, "pass_yards": 3609, "pass_tds": 26, "pass_attempts": 496, "completions": 310, "interceptions": 8, "pass_epa": 84.64462057768867, "rush_yards_allowed": 1773, "rush_tds_allowed": 16, "pass_yards_allowed": 4165, "pass_tds_allowed": 30, "interceptions_forced": 11, "rush_ypg": 148.4, "rush_ypg_allowed": 110.8, "pass_ypg": 225.6, "pass_ypg_allowed": 260.3, "ppg": 25.5, "ppg_against": 26.2, "completion_pct": 62.5}, {"season": 2020, "team": "DAL", "points_for": 395, "points_against": 473, "games_played": 16, "rush_yards": 1788, "rush_tds": 14, "rush_carries": 430, "pass_yards": 4488, "pass_tds": 24, "pass_attempts": 636, "completions": 411, "interceptions": 13, "pass_epa": -11.81447035487317, "rush_yards_allowed": 2541, "rush_tds_allowed": 20, "pass_yards_allowed": 3755, "pass_tds_allowed": 33, "interceptions_forced": 10, "rush_ypg": 111.8, "rush_ypg_allowed": 158.8, "pass_ypg": 280.5, "pass_ypg_allowed": 234.7, "ppg": 24.7, "ppg_against": 29.6, "completion_pct": 64.6}, {"season": 2020, "team": "DEN", "points_for": 323, "points_against": 446, "games_played": 16, "rush_yards": 1918, "rush_tds": 13, "rush_carries": 442, "pass_yards": 3660, "pass_tds": 21, "pass_attempts": 547, "completions": 316, "interceptions": 21, "pass_epa": -50.73225309639983, "rush_yards_allowed": 2080, "rush_tds_allowed": 22, "pass_yards_allowed": 3973, "pass_tds_allowed": 21, "interceptions_forced": 9, "rush_ypg": 119.9, "rush_ypg_allowed": 130.0, "pass_ypg": 228.8, "pass_ypg_allowed": 248.3, "ppg": 20.2, "ppg_against": 27.9, "completion_pct": 57.8}, {"season": 2020, "team": "DET", "points_for": 377, "points_against": 519, "games_played": 16, "rush_yards": 1499, "rush_tds": 17, "rush_carries": 367, "pass_yards": 4397, "pass_tds": 27, "pass_attempts": 581, "completions": 374, "interceptions": 13, "pass_epa": 31.37451843068688, "rush_yards_allowed": 2158, "rush_tds_allowed": 27, "pass_yards_allowed": 4753, "pass_tds_allowed": 38, "interceptions_forced": 7, "rush_ypg": 93.7, "rush_ypg_allowed": 134.9, "pass_ypg": 274.8, "pass_ypg_allowed": 297.1, "ppg": 23.6, "ppg_against": 32.4, "completion_pct": 64.4}, {"season": 2020, "team": "GB", "points_for": 509, "points_against": 369, "games_played": 16, "rush_yards": 2118, "rush_tds": 16, "rush_carries": 443, "pass_yards": 4299, "pass_tds": 48, "pass_attempts": 526, "completions": 372, "interceptions": 5, "pass_epa": 184.19043211778282, "rush_yards_allowed": 1805, "rush_tds_allowed": 16, "pass_yards_allowed": 3793, "pass_tds_allowed": 23, "interceptions_forced": 11, "rush_ypg": 132.4, "rush_ypg_allowed": 112.8, "pass_ypg": 268.7, "pass_ypg_allowed": 237.1, "ppg": 31.8, "ppg_against": 23.1, "completion_pct": 70.7}, {"season": 2020, "team": "HOU", "points_for": 384, "points_against": 464, "games_played": 16, "rush_yards": 1466, "rush_tds": 10, "rush_carries": 344, "pass_yards": 4843, "pass_tds": 33, "pass_attempts": 545, "completions": 383, "interceptions": 7, "pass_epa": 130.40691468856824, "rush_yards_allowed": 2564, "rush_tds_allowed": 24, "pass_yards_allowed": 4325, "pass_tds_allowed": 30, "interceptions_forced": 3, "rush_ypg": 91.6, "rush_ypg_allowed": 160.2, "pass_ypg": 302.7, "pass_ypg_allowed": 270.3, "ppg": 24.0, "ppg_against": 29.0, "completion_pct": 70.3}, {"season": 2020, "team": "IND", "points_for": 451, "points_against": 362, "games_played": 16, "rush_yards": 1996, "rush_tds": 20, "rush_carries": 459, "pass_yards": 4186, "pass_tds": 24, "pass_attempts": 551, "completions": 371, "interceptions": 11, "pass_epa": 96.00539620815726, "rush_yards_allowed": 1448, "rush_tds_allowed": 16, "pass_yards_allowed": 4080, "pass_tds_allowed": 24, "interceptions_forced": 15, "rush_ypg": 124.8, "rush_ypg_allowed": 90.5, "pass_ypg": 261.6, "pass_ypg_allowed": 255.0, "ppg": 28.2, "ppg_against": 22.6, "completion_pct": 67.3}, {"season": 2020, "team": "JAX", "points_for": 306, "points_against": 492, "games_played": 16, "rush_yards": 1519, "rush_tds": 9, "rush_carries": 337, "pass_yards": 3955, "pass_tds": 25, "pass_attempts": 616, "completions": 387, "interceptions": 16, "pass_epa": -37.98679692334165, "rush_yards_allowed": 2452, "rush_tds_allowed": 23, "pass_yards_allowed": 4322, "pass_tds_allowed": 34, "interceptions_forced": 12, "rush_ypg": 94.9, "rush_ypg_allowed": 153.2, "pass_ypg": 247.2, "pass_ypg_allowed": 270.1, "ppg": 19.1, "ppg_against": 30.8, "completion_pct": 62.8}, {"season": 2020, "team": "KC", "points_for": 473, "points_against": 362, "games_played": 16, "rush_yards": 1799, "rush_tds": 13, "rush_carries": 403, "pass_yards": 4988, "pass_tds": 40, "pass_attempts": 626, "completions": 418, "interceptions": 6, "pass_epa": 199.98568809659142, "rush_yards_allowed": 1954, "rush_tds_allowed": 14, "pass_yards_allowed": 3940, "pass_tds_allowed": 29, "interceptions_forced": 16, "rush_ypg": 112.4, "rush_ypg_allowed": 122.1, "pass_ypg": 311.8, "pass_ypg_allowed": 246.2, "ppg": 29.6, "ppg_against": 22.6, "completion_pct": 66.8}, {"season": 2020, "team": "LA", "points_for": 372, "points_against": 296, "games_played": 16, "rush_yards": 2018, "rush_tds": 19, "rush_carries": 473, "pass_yards": 4183, "pass_tds": 20, "pass_attempts": 590, "completions": 392, "interceptions": 14, "pass_epa": 22.54185543228951, "rush_yards_allowed": 1460, "rush_tds_allowed": 12, "pass_yards_allowed": 3401, "pass_tds_allowed": 17, "interceptions_forced": 14, "rush_ypg": 126.1, "rush_ypg_allowed": 91.2, "pass_ypg": 261.4, "pass_ypg_allowed": 212.6, "ppg": 23.2, "ppg_against": 18.5, "completion_pct": 66.4}, {"season": 2020, "team": "LAC", "points_for": 384, "points_against": 426, "games_played": 16, "rush_yards": 1784, "rush_tds": 12, "rush_carries": 466, "pass_yards": 4548, "pass_tds": 31, "pass_attempts": 626, "completions": 413, "interceptions": 10, "pass_epa": 90.24402972394628, "rush_yards_allowed": 1917, "rush_tds_allowed": 17, "pass_yards_allowed": 3656, "pass_tds_allowed": 27, "interceptions_forced": 12, "rush_ypg": 111.5, "rush_ypg_allowed": 119.8, "pass_ypg": 284.2, "pass_ypg_allowed": 228.5, "ppg": 24.0, "ppg_against": 26.6, "completion_pct": 66.0}, {"season": 2020, "team": "LV", "points_for": 434, "points_against": 478, "games_played": 16, "rush_yards": 1916, "rush_tds": 20, "rush_carries": 457, "pass_yards": 4354, "pass_tds": 28, "pass_attempts": 550, "completions": 368, "interceptions": 10, "pass_epa": 66.12503723899661, "rush_yards_allowed": 2013, "rush_tds_allowed": 24, "pass_yards_allowed": 4337, "pass_tds_allowed": 28, "interceptions_forced": 10, "rush_ypg": 119.8, "rush_ypg_allowed": 125.8, "pass_ypg": 272.1, "pass_ypg_allowed": 271.1, "ppg": 27.1, "ppg_against": 29.9, "completion_pct": 66.9}, {"season": 2020, "team": "MIA", "points_for": 404, "points_against": 338, "games_played": 16, "rush_yards": 1688, "rush_tds": 15, "rush_carries": 428, "pass_yards": 3905, "pass_tds": 24, "pass_attempts": 557, "completions": 369, "interceptions": 13, "pass_epa": 34.34202873289004, "rush_yards_allowed": 1862, "rush_tds_allowed": 17, "pass_yards_allowed": 4373, "pass_tds_allowed": 21, "interceptions_forced": 18, "rush_ypg": 105.5, "rush_ypg_allowed": 116.4, "pass_ypg": 244.1, "pass_ypg_allowed": 273.3, "ppg": 25.2, "ppg_against": 21.1, "completion_pct": 66.2}, {"season": 2020, "team": "MIN", "points_for": 430, "points_against": 475, "games_played": 16, "rush_yards": 2283, "rush_tds": 20, "rush_carries": 468, "pass_yards": 4265, "pass_tds": 35, "pass_attempts": 516, "completions": 349, "interceptions": 13, "pass_epa": 94.0074228925342, "rush_yards_allowed": 2151, "rush_tds_allowed": 19, "pass_yards_allowed": 4259, "pass_tds_allowed": 30, "interceptions_forced": 15, "rush_ypg": 142.7, "rush_ypg_allowed": 134.4, "pass_ypg": 266.6, "pass_ypg_allowed": 266.2, "ppg": 26.9, "ppg_against": 29.7, "completion_pct": 67.6}, {"season": 2020, "team": "NE", "points_for": 326, "points_against": 353, "games_played": 16, "rush_yards": 2346, "rush_tds": 20, "rush_carries": 502, "pass_yards": 3043, "pass_tds": 10, "pass_attempts": 436, "completions": 279, "interceptions": 14, "pass_epa": -31.80421382433255, "rush_yards_allowed": 2103, "rush_tds_allowed": 17, "pass_yards_allowed": 3709, "pass_tds_allowed": 22, "interceptions_forced": 18, "rush_ypg": 146.6, "rush_ypg_allowed": 131.4, "pass_ypg": 190.2, "pass_ypg_allowed": 231.8, "ppg": 20.4, "ppg_against": 22.1, "completion_pct": 64.0}, {"season": 2020, "team": "NO", "points_for": 482, "points_against": 337, "games_played": 16, "rush_yards": 2265, "rush_tds": 30, "rush_carries": 494, "pass_yards": 3017, "pass_tds": 24, "pass_attempts": 401, "completions": 282, "interceptions": 6, "pass_epa": 69.5735080691368, "rush_yards_allowed": 1502, "rush_tds_allowed": 11, "pass_yards_allowed": 3746, "pass_tds_allowed": 28, "interceptions_forced": 16, "rush_ypg": 141.6, "rush_ypg_allowed": 93.9, "pass_ypg": 188.6, "pass_ypg_allowed": 234.1, "ppg": 30.1, "ppg_against": 21.1, "completion_pct": 70.3}, {"season": 2020, "team": "NYG", "points_for": 280, "points_against": 357, "games_played": 16, "rush_yards": 1768, "rush_tds": 13, "rush_carries": 399, "pass_yards": 3318, "pass_tds": 12, "pass_attempts": 514, "completions": 320, "interceptions": 11, "pass_epa": -32.93274109657165, "rush_yards_allowed": 1782, "rush_tds_allowed": 14, "pass_yards_allowed": 4119, "pass_tds_allowed": 21, "interceptions_forced": 11, "rush_ypg": 110.5, "rush_ypg_allowed": 111.4, "pass_ypg": 207.4, "pass_ypg_allowed": 257.4, "ppg": 17.5, "ppg_against": 22.3, "completion_pct": 62.3}, {"season": 2020, "team": "NYJ", "points_for": 243, "points_against": 457, "games_played": 16, "rush_yards": 1683, "rush_tds": 9, "rush_carries": 406, "pass_yards": 3072, "pass_tds": 15, "pass_attempts": 498, "completions": 291, "interceptions": 14, "pass_epa": -86.022246270537, "rush_yards_allowed": 1792, "rush_tds_allowed": 16, "pass_yards_allowed": 4563, "pass_tds_allowed": 33, "interceptions_forced": 10, "rush_ypg": 105.2, "rush_ypg_allowed": 112.0, "pass_ypg": 192.0, "pass_ypg_allowed": 285.2, "ppg": 15.2, "ppg_against": 28.6, "completion_pct": 58.4}, {"season": 2020, "team": "PHI", "points_for": 334, "points_against": 418, "games_played": 16, "rush_yards": 2027, "rush_tds": 16, "rush_carries": 403, "pass_yards": 3713, "pass_tds": 22, "pass_attempts": 597, "completions": 333, "interceptions": 20, "pass_epa": -92.97339856336245, "rush_yards_allowed": 2012, "rush_tds_allowed": 20, "pass_yards_allowed": 3805, "pass_tds_allowed": 25, "interceptions_forced": 7, "rush_ypg": 126.7, "rush_ypg_allowed": 125.8, "pass_ypg": 232.1, "pass_ypg_allowed": 237.8, "ppg": 20.9, "ppg_against": 26.1, "completion_pct": 55.8}, {"season": 2020, "team": "PIT", "points_for": 416, "points_against": 312, "games_played": 16, "rush_yards": 1351, "rush_tds": 12, "rush_carries": 373, "pass_yards": 4129, "pass_tds": 35, "pass_attempts": 656, "completions": 428, "interceptions": 11, "pass_epa": 61.94494827584145, "rush_yards_allowed": 1783, "rush_tds_allowed": 13, "pass_yards_allowed": 3494, "pass_tds_allowed": 22, "interceptions_forced": 18, "rush_ypg": 84.4, "rush_ypg_allowed": 111.4, "pass_ypg": 258.1, "pass_ypg_allowed": 218.4, "ppg": 26.0, "ppg_against": 19.5, "completion_pct": 65.2}, {"season": 2020, "team": "SEA", "points_for": 459, "points_against": 371, "games_played": 16, "rush_yards": 1971, "rush_tds": 15, "rush_carries": 411, "pass_yards": 4245, "pass_tds": 40, "pass_attempts": 563, "completions": 388, "interceptions": 13, "pass_epa": 79.01634611379795, "rush_yards_allowed": 1529, "rush_tds_allowed": 18, "pass_yards_allowed": 4811, "pass_tds_allowed": 23, "interceptions_forced": 14, "rush_ypg": 123.2, "rush_ypg_allowed": 95.6, "pass_ypg": 265.3, "pass_ypg_allowed": 300.7, "ppg": 28.7, "ppg_against": 23.2, "completion_pct": 68.9}, {"season": 2020, "team": "SF", "points_for": 376, "points_against": 390, "games_played": 16, "rush_yards": 1889, "rush_tds": 19, "rush_carries": 437, "pass_yards": 4320, "pass_tds": 25, "pass_attempts": 570, "completions": 371, "interceptions": 17, "pass_epa": 37.21814144777499, "rush_yards_allowed": 1703, "rush_tds_allowed": 12, "pass_yards_allowed": 3514, "pass_tds_allowed": 25, "interceptions_forced": 12, "rush_ypg": 118.1, "rush_ypg_allowed": 106.4, "pass_ypg": 270.0, "pass_ypg_allowed": 219.6, "ppg": 23.5, "ppg_against": 24.4, "completion_pct": 65.1}, {"season": 2020, "team": "TB", "points_for": 492, "points_against": 355, "games_played": 16, "rush_yards": 1519, "rush_tds": 16, "rush_carries": 369, "pass_yards": 4776, "pass_tds": 42, "pass_attempts": 626, "completions": 410, "interceptions": 12, "pass_epa": 130.82164800044643, "rush_yards_allowed": 1289, "rush_tds_allowed": 10, "pass_yards_allowed": 4207, "pass_tds_allowed": 29, "interceptions_forced": 15, "rush_ypg": 94.9, "rush_ypg_allowed": 80.6, "pass_ypg": 298.5, "pass_ypg_allowed": 262.9, "ppg": 30.8, "ppg_against": 22.2, "completion_pct": 65.5}, {"season": 2020, "team": "TEN", "points_for": 491, "points_against": 439, "games_played": 16, "rush_yards": 2690, "rush_tds": 26, "rush_carries": 521, "pass_yards": 3826, "pass_tds": 33, "pass_attempts": 484, "completions": 316, "interceptions": 7, "pass_epa": 127.77123030499133, "rush_yards_allowed": 1933, "rush_tds_allowed": 18, "pass_yards_allowed": 4587, "pass_tds_allowed": 36, "interceptions_forced": 15, "rush_ypg": 168.1, "rush_ypg_allowed": 120.8, "pass_ypg": 239.1, "pass_ypg_allowed": 286.7, "ppg": 30.7, "ppg_against": 27.4, "completion_pct": 65.3}, {"season": 2020, "team": "WAS", "points_for": 335, "points_against": 329, "games_played": 16, "rush_yards": 1611, "rush_tds": 18, "rush_carries": 400, "pass_yards": 3768, "pass_tds": 16, "pass_attempts": 599, "completions": 388, "interceptions": 16, "pass_epa": -65.03863938576943, "rush_yards_allowed": 1805, "rush_tds_allowed": 14, "pass_yards_allowed": 3363, "pass_tds_allowed": 21, "interceptions_forced": 16, "rush_ypg": 100.7, "rush_ypg_allowed": 112.8, "pass_ypg": 235.5, "pass_ypg_allowed": 210.2, "ppg": 20.9, "ppg_against": 20.6, "completion_pct": 64.8}, {"season": 2021, "team": "ARI", "points_for": 449, "points_against": 366, "games_played": 17, "rush_yards": 2076, "rush_tds": 23, "rush_carries": 496, "pass_yards": 4563, "pass_tds": 27, "pass_attempts": 589, "completions": 413, "interceptions": 11, "pass_epa": 74.49748889110852, "rush_yards_allowed": 1952, "rush_tds_allowed": 10, "pass_yards_allowed": 3835, "pass_tds_allowed": 30, "interceptions_forced": 13, "rush_ypg": 122.1, "rush_ypg_allowed": 114.8, "pass_ypg": 268.4, "pass_ypg_allowed": 225.6, "ppg": 26.4, "ppg_against": 21.5, "completion_pct": 70.1}, {"season": 2021, "team": "ATL", "points_for": 313, "points_against": 459, "games_played": 17, "rush_yards": 1451, "rush_tds": 11, "rush_carries": 393, "pass_yards": 3987, "pass_tds": 20, "pass_attempts": 571, "completions": 377, "interceptions": 14, "pass_epa": -12.374085161054797, "rush_yards_allowed": 2242, "rush_tds_allowed": 19, "pass_yards_allowed": 3939, "pass_tds_allowed": 30, "interceptions_forced": 12, "rush_ypg": 85.4, "rush_ypg_allowed": 131.9, "pass_ypg": 234.5, "pass_ypg_allowed": 231.7, "ppg": 18.4, "ppg_against": 27.0, "completion_pct": 66.0}, {"season": 2021, "team": "BAL", "points_for": 387, "points_against": 392, "games_played": 17, "rush_yards": 2479, "rush_tds": 18, "rush_carries": 517, "pass_yards": 4267, "pass_tds": 21, "pass_attempts": 610, "completions": 396, "interceptions": 18, "pass_epa": 2.0407116519346147, "rush_yards_allowed": 1436, "rush_tds_allowed": 13, "pass_yards_allowed": 4986, "pass_tds_allowed": 31, "interceptions_forced": 9, "rush_ypg": 145.8, "rush_ypg_allowed": 84.5, "pass_ypg": 251.0, "pass_ypg_allowed": 293.3, "ppg": 22.8, "ppg_against": 23.1, "completion_pct": 64.9}, {"season": 2021, "team": "BUF", "points_for": 483, "points_against": 289, "games_played": 17, "rush_yards": 2209, "rush_tds": 20, "rush_carries": 461, "pass_yards": 4450, "pass_tds": 36, "pass_attempts": 654, "completions": 415, "interceptions": 16, "pass_epa": 78.3317239224012, "rush_yards_allowed": 1866, "rush_tds_allowed": 19, "pass_yards_allowed": 3047, "pass_tds_allowed": 12, "interceptions_forced": 19, "rush_ypg": 129.9, "rush_ypg_allowed": 109.8, "pass_ypg": 261.8, "pass_ypg_allowed": 179.2, "ppg": 28.4, "ppg_against": 17.0, "completion_pct": 63.5}, {"season": 2021, "team": "CAR", "points_for": 304, "points_against": 404, "games_played": 17, "rush_yards": 1842, "rush_tds": 17, "rush_carries": 455, "pass_yards": 3573, "pass_tds": 14, "pass_attempts": 598, "completions": 348, "interceptions": 21, "pass_epa": -130.89112621777426, "rush_yards_allowed": 1935, "rush_tds_allowed": 16, "pass_yards_allowed": 3321, "pass_tds_allowed": 25, "interceptions_forced": 9, "rush_ypg": 108.4, "rush_ypg_allowed": 113.8, "pass_ypg": 210.2, "pass_ypg_allowed": 195.4, "ppg": 17.9, "ppg_against": 23.8, "completion_pct": 58.2}, {"season": 2021, "team": "CHI", "points_for": 311, "points_against": 407, "games_played": 17, "rush_yards": 2018, "rush_tds": 14, "rush_carries": 475, "pass_yards": 3635, "pass_tds": 16, "pass_attempts": 541, "completions": 332, "interceptions": 19, "pass_epa": -89.44364350718214, "rush_yards_allowed": 2127, "rush_tds_allowed": 14, "pass_yards_allowed": 3623, "pass_tds_allowed": 31, "interceptions_forced": 8, "rush_ypg": 118.7, "rush_ypg_allowed": 125.1, "pass_ypg": 213.8, "pass_ypg_allowed": 213.1, "ppg": 18.3, "ppg_against": 23.9, "completion_pct": 61.4}, {"season": 2021, "team": "CIN", "points_for": 460, "points_against": 376, "games_played": 17, "rush_yards": 1742, "rush_tds": 16, "rush_carries": 436, "pass_yards": 4760, "pass_tds": 36, "pass_attempts": 554, "completions": 383, "interceptions": 14, "pass_epa": 88.05892815273197, "rush_yards_allowed": 1742, "rush_tds_allowed": 15, "pass_yards_allowed": 4487, "pass_tds_allowed": 26, "interceptions_forced": 13, "rush_ypg": 102.5, "rush_ypg_allowed": 102.5, "pass_ypg": 280.0, "pass_ypg_allowed": 263.9, "ppg": 27.1, "ppg_against": 22.1, "completion_pct": 69.1}, {"season": 2021, "team": "CLE", "points_for": 349, "points_against": 371, "games_played": 17, "rush_yards": 2471, "rush_tds": 20, "rush_carries": 485, "pass_yards": 3619, "pass_tds": 21, "pass_attempts": 520, "completions": 320, "interceptions": 14, "pass_epa": -11.509004108896642, "rush_yards_allowed": 1857, "rush_tds_allowed": 13, "pass_yards_allowed": 3712, "pass_tds_allowed": 29, "interceptions_forced": 13, "rush_ypg": 145.4, "rush_ypg_allowed": 109.2, "pass_ypg": 212.9, "pass_ypg_allowed": 218.4, "ppg": 20.5, "ppg_against": 21.8, "completion_pct": 61.5}, {"season": 2021, "team": "DAL", "points_for": 530, "points_against": 358, "games_played": 17, "rush_yards": 2119, "rush_tds": 15, "rush_carries": 473, "pass_yards": 4871, "pass_tds": 40, "pass_attempts": 643, "completions": 440, "interceptions": 11, "pass_epa": 116.35915465389611, "rush_yards_allowed": 1918, "rush_tds_allowed": 13, "pass_yards_allowed": 4057, "pass_tds_allowed": 22, "interceptions_forced": 22, "rush_ypg": 124.6, "rush_ypg_allowed": 112.8, "pass_ypg": 286.5, "pass_ypg_allowed": 238.6, "ppg": 31.2, "ppg_against": 21.1, "completion_pct": 68.4}, {"season": 2021, "team": "DEN", "points_for": 335, "points_against": 322, "games_played": 17, "rush_yards": 2025, "rush_tds": 16, "rush_carries": 455, "pass_yards": 3839, "pass_tds": 20, "pass_attempts": 539, "completions": 352, "interceptions": 9, "pass_epa": 45.83661024317377, "rush_yards_allowed": 1892, "rush_tds_allowed": 9, "pass_yards_allowed": 3901, "pass_tds_allowed": 22, "interceptions_forced": 13, "rush_ypg": 119.1, "rush_ypg_allowed": 111.3, "pass_ypg": 225.8, "pass_ypg_allowed": 229.5, "ppg": 19.7, "ppg_against": 18.9, "completion_pct": 65.3}, {"season": 2021, "team": "DET", "points_for": 325, "points_against": 467, "games_played": 17, "rush_yards": 1886, "rush_tds": 12, "rush_carries": 427, "pass_yards": 3771, "pass_tds": 22, "pass_attempts": 588, "completions": 393, "interceptions": 14, "pass_epa": -30.307106579245435, "rush_yards_allowed": 2296, "rush_tds_allowed": 19, "pass_yards_allowed": 4361, "pass_tds_allowed": 31, "interceptions_forced": 11, "rush_ypg": 110.9, "rush_ypg_allowed": 135.1, "pass_ypg": 221.8, "pass_ypg_allowed": 256.5, "ppg": 19.1, "ppg_against": 27.5, "completion_pct": 66.8}, {"season": 2021, "team": "GB", "points_for": 450, "points_against": 371, "games_played": 17, "rush_yards": 1900, "rush_tds": 13, "rush_carries": 446, "pass_yards": 4526, "pass_tds": 39, "pass_attempts": 593, "completions": 402, "interceptions": 7, "pass_epa": 121.74914223977385, "rush_yards_allowed": 1855, "rush_tds_allowed": 13, "pass_yards_allowed": 3943, "pass_tds_allowed": 30, "interceptions_forced": 18, "rush_ypg": 111.8, "rush_ypg_allowed": 109.1, "pass_ypg": 266.2, "pass_ypg_allowed": 231.9, "ppg": 26.5, "ppg_against": 21.8, "completion_pct": 67.8}, {"season": 2021, "team": "HOU", "points_for": 280, "points_against": 452, "games_played": 17, "rush_yards": 1422, "rush_tds": 8, "rush_carries": 420, "pass_yards": 3630, "pass_tds": 21, "pass_attempts": 544, "completions": 354, "interceptions": 15, "pass_epa": -59.55692493746413, "rush_yards_allowed": 2418, "rush_tds_allowed": 25, "pass_yards_allowed": 4342, "pass_tds_allowed": 27, "interceptions_forced": 17, "rush_ypg": 83.6, "rush_ypg_allowed": 142.2, "pass_ypg": 213.5, "pass_ypg_allowed": 255.4, "ppg": 16.5, "ppg_against": 26.6, "completion_pct": 65.1}, {"season": 2021, "team": "IND", "points_for": 451, "points_against": 365, "games_played": 17, "rush_yards": 2540, "rush_tds": 22, "rush_carries": 499, "pass_yards": 3588, "pass_tds": 27, "pass_attempts": 521, "completions": 324, "interceptions": 8, "pass_epa": 9.956186922557427, "rush_yards_allowed": 1854, "rush_tds_allowed": 10, "pass_yards_allowed": 4203, "pass_tds_allowed": 32, "interceptions_forced": 19, "rush_ypg": 149.4, "rush_ypg_allowed": 109.1, "pass_ypg": 211.1, "pass_ypg_allowed": 247.2, "ppg": 26.5, "ppg_against": 21.5, "completion_pct": 62.2}, {"season": 2021, "team": "JAX", "points_for": 253, "points_against": 457, "games_played": 17, "rush_yards": 1755, "rush_tds": 13, "rush_carries": 392, "pass_yards": 3674, "pass_tds": 12, "pass_attempts": 604, "completions": 361, "interceptions": 17, "pass_epa": -58.918805229335575, "rush_yards_allowed": 2127, "rush_tds_allowed": 22, "pass_yards_allowed": 4111, "pass_tds_allowed": 24, "interceptions_forced": 7, "rush_ypg": 103.2, "rush_ypg_allowed": 125.1, "pass_ypg": 216.1, "pass_ypg_allowed": 241.8, "ppg": 14.9, "ppg_against": 26.9, "completion_pct": 59.8}, {"season": 2021, "team": "KC", "points_for": 480, "points_against": 364, "games_played": 17, "rush_yards": 1955, "rush_tds": 16, "rush_carries": 431, "pass_yards": 4921, "pass_tds": 37, "pass_attempts": 674, "completions": 447, "interceptions": 13, "pass_epa": 142.83543365666273, "rush_yards_allowed": 1999, "rush_tds_allowed": 15, "pass_yards_allowed": 4442, "pass_tds_allowed": 26, "interceptions_forced": 15, "rush_ypg": 115.0, "rush_ypg_allowed": 117.6, "pass_ypg": 289.5, "pass_ypg_allowed": 261.3, "ppg": 28.2, "ppg_against": 21.4, "completion_pct": 66.3}, {"season": 2021, "team": "LA", "points_for": 460, "points_against": 372, "games_played": 17, "rush_yards": 1683, "rush_tds": 10, "rush_carries": 420, "pass_yards": 4891, "pass_tds": 41, "pass_attempts": 605, "completions": 405, "interceptions": 18, "pass_epa": 111.23494410768109, "rush_yards_allowed": 1754, "rush_tds_allowed": 18, "pass_yards_allowed": 4435, "pass_tds_allowed": 16, "interceptions_forced": 19, "rush_ypg": 99.0, "rush_ypg_allowed": 103.2, "pass_ypg": 287.7, "pass_ypg_allowed": 260.9, "ppg": 27.1, "ppg_against": 21.9, "completion_pct": 66.9}, {"season": 2021, "team": "LAC", "points_for": 474, "points_against": 459, "games_played": 17, "rush_yards": 1834, "rush_tds": 18, "rush_carries": 423, "pass_yards": 5014, "pass_tds": 38, "pass_attempts": 672, "completions": 443, "interceptions": 15, "pass_epa": 121.55570376370669, "rush_yards_allowed": 2361, "rush_tds_allowed": 22, "pass_yards_allowed": 3991, "pass_tds_allowed": 27, "interceptions_forced": 11, "rush_ypg": 107.9, "rush_ypg_allowed": 138.9, "pass_ypg": 294.9, "pass_ypg_allowed": 234.8, "ppg": 27.9, "ppg_against": 27.0, "completion_pct": 65.9}, {"season": 2021, "team": "LV", "points_for": 374, "points_against": 439, "games_played": 17, "rush_yards": 1617, "rush_tds": 14, "rush_carries": 414, "pass_yards": 4808, "pass_tds": 23, "pass_attempts": 628, "completions": 429, "interceptions": 14, "pass_epa": 36.74009039532134, "rush_yards_allowed": 1943, "rush_tds_allowed": 18, "pass_yards_allowed": 3980, "pass_tds_allowed": 29, "interceptions_forced": 6, "rush_ypg": 95.1, "rush_ypg_allowed": 114.3, "pass_ypg": 282.8, "pass_ypg_allowed": 234.1, "ppg": 22.0, "ppg_against": 25.8, "completion_pct": 68.3}, {"season": 2021, "team": "MIA", "points_for": 341, "points_against": 373, "games_played": 17, "rush_yards": 1568, "rush_tds": 12, "rush_carries": 442, "pass_yards": 3936, "pass_tds": 21, "pass_attempts": 613, "completions": 404, "interceptions": 14, "pass_epa": -1.8960531846849857, "rush_yards_allowed": 1867, "rush_tds_allowed": 16, "pass_yards_allowed": 4251, "pass_tds_allowed": 23, "interceptions_forced": 14, "rush_ypg": 92.2, "rush_ypg_allowed": 109.8, "pass_ypg": 231.5, "pass_ypg_allowed": 250.1, "ppg": 20.1, "ppg_against": 21.9, "completion_pct": 65.9}, {"season": 2021, "team": "MIN", "points_for": 425, "points_against": 426, "games_played": 17, "rush_yards": 1930, "rush_tds": 10, "rush_carries": 449, "pass_yards": 4415, "pass_tds": 34, "pass_attempts": 600, "completions": 396, "interceptions": 7, "pass_epa": 56.12341977423161, "rush_yards_allowed": 2222, "rush_tds_allowed": 15, "pass_yards_allowed": 4643, "pass_tds_allowed": 29, "interceptions_forced": 16, "rush_ypg": 113.5, "rush_ypg_allowed": 130.7, "pass_ypg": 259.7, "pass_ypg_allowed": 273.1, "ppg": 25.0, "ppg_against": 25.1, "completion_pct": 66.0}, {"season": 2021, "team": "NE", "points_for": 462, "points_against": 303, "games_played": 17, "rush_yards": 2151, "rush_tds": 24, "rush_carries": 489, "pass_yards": 4028, "pass_tds": 23, "pass_attempts": 532, "completions": 361, "interceptions": 13, "pass_epa": 73.75327101565482, "rush_yards_allowed": 2103, "rush_tds_allowed": 9, "pass_yards_allowed": 3437, "pass_tds_allowed": 21, "interceptions_forced": 22, "rush_ypg": 126.5, "rush_ypg_allowed": 123.7, "pass_ypg": 236.9, "pass_ypg_allowed": 202.2, "ppg": 27.2, "ppg_against": 17.8, "completion_pct": 67.9}, {"season": 2021, "team": "NO", "points_for": 364, "points_against": 335, "games_played": 17, "rush_yards": 1991, "rush_tds": 12, "rush_carries": 510, "pass_yards": 2459, "pass_tds": 25, "pass_attempts": 369, "completions": 215, "interceptions": 8, "pass_epa": -18.411728588190044, "rush_yards_allowed": 1589, "rush_tds_allowed": 12, "pass_yards_allowed": 4131, "pass_tds_allowed": 20, "interceptions_forced": 18, "rush_ypg": 117.1, "rush_ypg_allowed": 93.5, "pass_ypg": 144.6, "pass_ypg_allowed": 243.0, "ppg": 21.4, "ppg_against": 19.7, "completion_pct": 58.3}, {"season": 2021, "team": "NYG", "points_for": 258, "points_against": 416, "games_played": 17, "rush_yards": 1688, "rush_tds": 8, "rush_carries": 419, "pass_yards": 3428, "pass_tds": 15, "pass_attempts": 588, "completions": 349, "interceptions": 20, "pass_epa": -128.34342543250784, "rush_yards_allowed": 2193, "rush_tds_allowed": 15, "pass_yards_allowed": 4013, "pass_tds_allowed": 27, "interceptions_forced": 13, "rush_ypg": 99.3, "rush_ypg_allowed": 129.0, "pass_ypg": 201.6, "pass_ypg_allowed": 236.1, "ppg": 15.2, "ppg_against": 24.5, "completion_pct": 59.4}, {"season": 2021, "team": "NYJ", "points_for": 310, "points_against": 504, "games_played": 17, "rush_yards": 1667, "rush_tds": 14, "rush_carries": 380, "pass_yards": 3959, "pass_tds": 20, "pass_attempts": 602, "completions": 357, "interceptions": 20, "pass_epa": -74.19963464410617, "rush_yards_allowed": 2351, "rush_tds_allowed": 28, "pass_yards_allowed": 4436, "pass_tds_allowed": 27, "interceptions_forced": 7, "rush_ypg": 98.1, "rush_ypg_allowed": 138.3, "pass_ypg": 232.9, "pass_ypg_allowed": 260.9, "ppg": 18.2, "ppg_against": 29.6, "completion_pct": 59.3}, {"season": 2021, "team": "PHI", "points_for": 444, "points_against": 385, "games_played": 17, "rush_yards": 2715, "rush_tds": 25, "rush_carries": 550, "pass_yards": 3583, "pass_tds": 20, "pass_attempts": 492, "completions": 306, "interceptions": 10, "pass_epa": 34.828957245548104, "rush_yards_allowed": 1834, "rush_tds_allowed": 18, "pass_yards_allowed": 3976, "pass_tds_allowed": 28, "interceptions_forced": 12, "rush_ypg": 159.7, "rush_ypg_allowed": 107.9, "pass_ypg": 210.8, "pass_ypg_allowed": 233.9, "ppg": 26.1, "ppg_against": 22.6, "completion_pct": 62.2}, {"season": 2021, "team": "PIT", "points_for": 343, "points_against": 398, "games_played": 17, "rush_yards": 1583, "rush_tds": 10, "rush_carries": 411, "pass_yards": 4017, "pass_tds": 23, "pass_attempts": 663, "completions": 425, "interceptions": 11, "pass_epa": -54.0709331782935, "rush_yards_allowed": 2483, "rush_tds_allowed": 17, "pass_yards_allowed": 3977, "pass_tds_allowed": 24, "interceptions_forced": 13, "rush_ypg": 93.1, "rush_ypg_allowed": 146.1, "pass_ypg": 236.3, "pass_ypg_allowed": 233.9, "ppg": 20.2, "ppg_against": 23.4, "completion_pct": 64.1}, {"season": 2021, "team": "SEA", "points_for": 395, "points_against": 366, "games_played": 17, "rush_yards": 2074, "rush_tds": 18, "rush_carries": 413, "pass_yards": 3815, "pass_tds": 30, "pass_attempts": 495, "completions": 324, "interceptions": 7, "pass_epa": 15.375291091702412, "rush_yards_allowed": 1932, "rush_tds_allowed": 16, "pass_yards_allowed": 4766, "pass_tds_allowed": 24, "interceptions_forced": 11, "rush_ypg": 122.0, "rush_ypg_allowed": 113.6, "pass_ypg": 224.4, "pass_ypg_allowed": 280.4, "ppg": 23.2, "ppg_against": 21.5, "completion_pct": 65.5}, {"season": 2021, "team": "SF", "points_for": 427, "points_against": 365, "games_played": 17, "rush_yards": 2166, "rush_tds": 22, "rush_carries": 499, "pass_yards": 4413, "pass_tds": 25, "pass_attempts": 512, "completions": 342, "interceptions": 14, "pass_epa": 103.86578798821279, "rush_yards_allowed": 1760, "rush_tds_allowed": 17, "pass_yards_allowed": 3815, "pass_tds_allowed": 25, "interceptions_forced": 9, "rush_ypg": 127.4, "rush_ypg_allowed": 103.5, "pass_ypg": 259.6, "pass_ypg_allowed": 224.4, "ppg": 25.1, "ppg_against": 21.5, "completion_pct": 66.8}, {"season": 2021, "team": "TB", "points_for": 511, "points_against": 353, "games_played": 17, "rush_yards": 1672, "rush_tds": 18, "rush_carries": 385, "pass_yards": 5383, "pass_tds": 43, "pass_attempts": 730, "completions": 492, "interceptions": 12, "pass_epa": 144.9597188345723, "rush_yards_allowed": 1573, "rush_tds_allowed": 11, "pass_yards_allowed": 4148, "pass_tds_allowed": 26, "interceptions_forced": 17, "rush_ypg": 98.4, "rush_ypg_allowed": 92.5, "pass_ypg": 316.6, "pass_ypg_allowed": 244.0, "ppg": 30.1, "ppg_against": 20.8, "completion_pct": 67.4}, {"season": 2021, "team": "TEN", "points_for": 419, "points_against": 354, "games_played": 17, "rush_yards": 2404, "rush_tds": 23, "rush_carries": 551, "pass_yards": 3734, "pass_tds": 21, "pass_attempts": 531, "completions": 357, "interceptions": 14, "pass_epa": 25.66361344669434, "rush_yards_allowed": 1438, "rush_tds_allowed": 14, "pass_yards_allowed": 4474, "pass_tds_allowed": 24, "interceptions_forced": 16, "rush_ypg": 141.4, "rush_ypg_allowed": 84.6, "pass_ypg": 219.6, "pass_ypg_allowed": 263.2, "ppg": 24.6, "ppg_against": 20.8, "completion_pct": 67.2}, {"season": 2021, "team": "WAS", "points_for": 335, "points_against": 434, "games_played": 17, "rush_yards": 2061, "rush_tds": 13, "rush_carries": 477, "pass_yards": 3746, "pass_tds": 21, "pass_attempts": 550, "completions": 356, "interceptions": 15, "pass_epa": -35.989729638705995, "rush_yards_allowed": 1775, "rush_tds_allowed": 14, "pass_yards_allowed": 4520, "pass_tds_allowed": 34, "interceptions_forced": 11, "rush_ypg": 121.2, "rush_ypg_allowed": 104.4, "pass_ypg": 220.4, "pass_ypg_allowed": 265.9, "ppg": 19.7, "ppg_against": 25.5, "completion_pct": 64.7}, {"season": 2022, "team": "ARI", "points_for": 340, "points_against": 449, "games_played": 17, "rush_yards": 1873, "rush_tds": 15, "rush_carries": 434, "pass_yards": 3962, "pass_tds": 17, "pass_attempts": 663, "completions": 432, "interceptions": 17, "pass_epa": -90.17503286257315, "rush_yards_allowed": 2016, "rush_tds_allowed": 21, "pass_yards_allowed": 4133, "pass_tds_allowed": 29, "interceptions_forced": 11, "rush_ypg": 110.2, "rush_ypg_allowed": 118.6, "pass_ypg": 233.1, "pass_ypg_allowed": 243.1, "ppg": 20.0, "ppg_against": 26.4, "completion_pct": 65.2}, {"season": 2022, "team": "ATL", "points_for": 365, "points_against": 386, "games_played": 17, "rush_yards": 2718, "rush_tds": 17, "rush_carries": 559, "pass_yards": 2927, "pass_tds": 17, "pass_attempts": 415, "completions": 257, "interceptions": 9, "pass_epa": 12.696833167405426, "rush_yards_allowed": 2214, "rush_tds_allowed": 15, "pass_yards_allowed": 4010, "pass_tds_allowed": 25, "interceptions_forced": 10, "rush_ypg": 159.9, "rush_ypg_allowed": 130.2, "pass_ypg": 172.2, "pass_ypg_allowed": 235.9, "ppg": 21.5, "ppg_against": 22.7, "completion_pct": 61.9}, {"season": 2022, "team": "BAL", "points_for": 350, "points_against": 315, "games_played": 17, "rush_yards": 2720, "rush_tds": 14, "rush_carries": 526, "pass_yards": 3202, "pass_tds": 19, "pass_attempts": 487, "completions": 300, "interceptions": 12, "pass_epa": -13.155215413487497, "rush_yards_allowed": 1566, "rush_tds_allowed": 11, "pass_yards_allowed": 4239, "pass_tds_allowed": 20, "interceptions_forced": 14, "rush_ypg": 160.0, "rush_ypg_allowed": 92.1, "pass_ypg": 188.4, "pass_ypg_allowed": 249.4, "ppg": 20.6, "ppg_against": 18.5, "completion_pct": 61.6}, {"season": 2022, "team": "BUF", "points_for": 455, "points_against": 286, "games_played": 16, "rush_yards": 2232, "rush_tds": 15, "rush_carries": 430, "pass_yards": 4291, "pass_tds": 35, "pass_attempts": 574, "completions": 361, "interceptions": 14, "pass_epa": 95.93615193244901, "rush_yards_allowed": 1673, "rush_tds_allowed": 10, "pass_yards_allowed": 3721, "pass_tds_allowed": 21, "interceptions_forced": 17, "rush_ypg": 139.5, "rush_ypg_allowed": 104.6, "pass_ypg": 268.2, "pass_ypg_allowed": 232.6, "ppg": 28.4, "ppg_against": 17.9, "completion_pct": 62.9}, {"season": 2022, "team": "CAR", "points_for": 347, "points_against": 374, "games_played": 17, "rush_yards": 2210, "rush_tds": 16, "rush_carries": 483, "pass_yards": 3246, "pass_tds": 16, "pass_attempts": 457, "completions": 267, "interceptions": 13, "pass_epa": -41.798702883362154, "rush_yards_allowed": 2085, "rush_tds_allowed": 17, "pass_yards_allowed": 4098, "pass_tds_allowed": 25, "interceptions_forced": 10, "rush_ypg": 130.0, "rush_ypg_allowed": 122.6, "pass_ypg": 190.9, "pass_ypg_allowed": 241.1, "ppg": 20.4, "ppg_against": 22.0, "completion_pct": 58.4}, {"season": 2022, "team": "CHI", "points_for": 326, "points_against": 463, "games_played": 17, "rush_yards": 3014, "rush_tds": 18, "rush_carries": 558, "pass_yards": 2598, "pass_tds": 19, "pass_attempts": 377, "completions": 223, "interceptions": 15, "pass_epa": -85.26358997559537, "rush_yards_allowed": 2674, "rush_tds_allowed": 31, "pass_yards_allowed": 3817, "pass_tds_allowed": 22, "interceptions_forced": 14, "rush_ypg": 177.3, "rush_ypg_allowed": 157.3, "pass_ypg": 152.8, "pass_ypg_allowed": 224.5, "ppg": 19.2, "ppg_against": 27.2, "completion_pct": 59.2}, {"season": 2022, "team": "CIN", "points_for": 418, "points_against": 322, "games_played": 16, "rush_yards": 1528, "rush_tds": 14, "rush_carries": 399, "pass_yards": 4497, "pass_tds": 35, "pass_attempts": 609, "completions": 417, "interceptions": 12, "pass_epa": 88.52278339076237, "rush_yards_allowed": 1706, "rush_tds_allowed": 12, "pass_yards_allowed": 3812, "pass_tds_allowed": 17, "interceptions_forced": 12, "rush_ypg": 95.5, "rush_ypg_allowed": 106.6, "pass_ypg": 281.1, "pass_ypg_allowed": 238.2, "ppg": 26.1, "ppg_against": 20.1, "completion_pct": 68.5}, {"season": 2022, "team": "CLE", "points_for": 361, "points_against": 381, "games_played": 17, "rush_yards": 2490, "rush_tds": 19, "rush_carries": 532, "pass_yards": 3710, "pass_tds": 19, "pass_attempts": 539, "completions": 335, "interceptions": 11, "pass_epa": -5.14501972078284, "rush_yards_allowed": 2295, "rush_tds_allowed": 22, "pass_yards_allowed": 3530, "pass_tds_allowed": 20, "interceptions_forced": 11, "rush_ypg": 146.5, "rush_ypg_allowed": 135.0, "pass_ypg": 218.2, "pass_ypg_allowed": 207.6, "ppg": 21.2, "ppg_against": 22.4, "completion_pct": 62.2}, {"season": 2022, "team": "DAL", "points_for": 467, "points_against": 342, "games_played": 17, "rush_yards": 2298, "rush_tds": 24, "rush_carries": 531, "pass_yards": 3911, "pass_tds": 28, "pass_attempts": 556, "completions": 355, "interceptions": 18, "pass_epa": 32.68326848221614, "rush_yards_allowed": 2198, "rush_tds_allowed": 9, "pass_yards_allowed": 3755, "pass_tds_allowed": 23, "interceptions_forced": 16, "rush_ypg": 135.2, "rush_ypg_allowed": 129.3, "pass_ypg": 230.1, "pass_ypg_allowed": 220.9, "ppg": 27.5, "ppg_against": 20.1, "completion_pct": 63.8}, {"season": 2022, "team": "DEN", "points_for": 287, "points_against": 359, "games_played": 17, "rush_yards": 1935, "rush_tds": 11, "rush_carries": 444, "pass_yards": 4007, "pass_tds": 18, "pass_attempts": 571, "completions": 345, "interceptions": 15, "pass_epa": -86.17285779168034, "rush_yards_allowed": 1866, "rush_tds_allowed": 12, "pass_yards_allowed": 3819, "pass_tds_allowed": 20, "interceptions_forced": 14, "rush_ypg": 113.8, "rush_ypg_allowed": 109.8, "pass_ypg": 235.7, "pass_ypg_allowed": 224.6, "ppg": 16.9, "ppg_against": 21.1, "completion_pct": 60.4}, {"season": 2022, "team": "DET", "points_for": 453, "points_against": 427, "games_played": 17, "rush_yards": 2179, "rush_tds": 23, "rush_carries": 480, "pass_yards": 4438, "pass_tds": 29, "pass_attempts": 587, "completions": 382, "interceptions": 7, "pass_epa": 101.11894791064833, "rush_yards_allowed": 2491, "rush_tds_allowed": 22, "pass_yards_allowed": 4446, "pass_tds_allowed": 26, "interceptions_forced": 12, "rush_ypg": 128.2, "rush_ypg_allowed": 146.5, "pass_ypg": 261.1, "pass_ypg_allowed": 261.5, "ppg": 26.6, "ppg_against": 25.1, "completion_pct": 65.1}, {"season": 2022, "team": "GB", "points_for": 370, "points_against": 371, "games_played": 17, "rush_yards": 2113, "rush_tds": 12, "rush_carries": 456, "pass_yards": 3890, "pass_tds": 27, "pass_attempts": 563, "completions": 364, "interceptions": 12, "pass_epa": -1.6200855390558604, "rush_yards_allowed": 2372, "rush_tds_allowed": 18, "pass_yards_allowed": 3549, "pass_tds_allowed": 21, "interceptions_forced": 17, "rush_ypg": 124.3, "rush_ypg_allowed": 139.5, "pass_ypg": 228.8, "pass_ypg_allowed": 208.8, "ppg": 21.8, "ppg_against": 21.8, "completion_pct": 64.7}, {"season": 2022, "team": "HOU", "points_for": 289, "points_against": 420, "games_played": 17, "rush_yards": 1476, "rush_tds": 7, "rush_carries": 398, "pass_yards": 3642, "pass_tds": 20, "pass_attempts": 577, "completions": 352, "interceptions": 19, "pass_epa": -112.1392886721116, "rush_yards_allowed": 2894, "rush_tds_allowed": 25, "pass_yards_allowed": 3775, "pass_tds_allowed": 15, "interceptions_forced": 16, "rush_ypg": 86.8, "rush_ypg_allowed": 170.2, "pass_ypg": 214.2, "pass_ypg_allowed": 222.1, "ppg": 17.0, "ppg_against": 24.7, "completion_pct": 61.0}, {"season": 2022, "team": "IND", "points_for": 289, "points_against": 427, "games_played": 17, "rush_yards": 1866, "rush_tds": 8, "rush_carries": 439, "pass_yards": 3855, "pass_tds": 17, "pass_attempts": 604, "completions": 398, "interceptions": 20, "pass_epa": -103.30296528279058, "rush_yards_allowed": 2109, "rush_tds_allowed": 20, "pass_yards_allowed": 3836, "pass_tds_allowed": 25, "interceptions_forced": 10, "rush_ypg": 109.8, "rush_ypg_allowed": 124.1, "pass_ypg": 226.8, "pass_ypg_allowed": 225.6, "ppg": 17.0, "ppg_against": 25.1, "completion_pct": 65.9}, {"season": 2022, "team": "JAX", "points_for": 404, "points_against": 350, "games_played": 17, "rush_yards": 2116, "rush_tds": 16, "rush_carries": 448, "pass_yards": 4148, "pass_tds": 25, "pass_attempts": 595, "completions": 394, "interceptions": 9, "pass_epa": 72.2425171848606, "rush_yards_allowed": 1951, "rush_tds_allowed": 14, "pass_yards_allowed": 4258, "pass_tds_allowed": 25, "interceptions_forced": 14, "rush_ypg": 124.5, "rush_ypg_allowed": 114.8, "pass_ypg": 244.0, "pass_ypg_allowed": 250.5, "ppg": 23.8, "ppg_against": 20.6, "completion_pct": 66.2}, {"season": 2022, "team": "KC", "points_for": 496, "points_against": 369, "games_played": 17, "rush_yards": 1970, "rush_tds": 18, "rush_carries": 417, "pass_yards": 5250, "pass_tds": 41, "pass_attempts": 650, "completions": 435, "interceptions": 12, "pass_epa": 191.23969090943714, "rush_yards_allowed": 1823, "rush_tds_allowed": 10, "pass_yards_allowed": 4138, "pass_tds_allowed": 33, "interceptions_forced": 11, "rush_ypg": 115.9, "rush_ypg_allowed": 107.2, "pass_ypg": 308.8, "pass_ypg_allowed": 243.4, "ppg": 29.2, "ppg_against": 21.7, "completion_pct": 66.9}, {"season": 2022, "team": "LA", "points_for": 307, "points_against": 384, "games_played": 17, "rush_yards": 1661, "rush_tds": 15, "rush_carries": 411, "pass_yards": 3488, "pass_tds": 16, "pass_attempts": 528, "completions": 345, "interceptions": 15, "pass_epa": -73.04751993691977, "rush_yards_allowed": 1956, "rush_tds_allowed": 12, "pass_yards_allowed": 4044, "pass_tds_allowed": 22, "interceptions_forced": 16, "rush_ypg": 97.7, "rush_ypg_allowed": 115.1, "pass_ypg": 205.2, "pass_ypg_allowed": 237.9, "ppg": 18.1, "ppg_against": 22.6, "completion_pct": 65.3}, {"season": 2022, "team": "LAC", "points_for": 391, "points_against": 384, "games_played": 17, "rush_yards": 1524, "rush_tds": 15, "rush_carries": 404, "pass_yards": 4791, "pass_tds": 26, "pass_attempts": 711, "completions": 485, "interceptions": 10, "pass_epa": 26.940543553316267, "rush_yards_allowed": 2478, "rush_tds_allowed": 17, "pass_yards_allowed": 3694, "pass_tds_allowed": 24, "interceptions_forced": 14, "rush_ypg": 89.6, "rush_ypg_allowed": 145.8, "pass_ypg": 281.8, "pass_ypg_allowed": 217.3, "ppg": 23.0, "ppg_against": 22.6, "completion_pct": 68.2}, {"season": 2022, "team": "LV", "points_for": 395, "points_against": 418, "games_played": 17, "rush_yards": 2059, "rush_tds": 12, "rush_carries": 428, "pass_yards": 4178, "pass_tds": 28, "pass_attempts": 585, "completions": 358, "interceptions": 17, "pass_epa": 21.32445975473523, "rush_yards_allowed": 2087, "rush_tds_allowed": 20, "pass_yards_allowed": 4319, "pass_tds_allowed": 25, "interceptions_forced": 6, "rush_ypg": 121.1, "rush_ypg_allowed": 122.8, "pass_ypg": 245.8, "pass_ypg_allowed": 254.1, "ppg": 23.2, "ppg_against": 24.6, "completion_pct": 61.2}, {"season": 2022, "team": "MIA", "points_for": 397, "points_against": 399, "games_played": 17, "rush_yards": 1686, "rush_tds": 12, "rush_carries": 390, "pass_yards": 4765, "pass_tds": 30, "pass_attempts": 584, "completions": 368, "interceptions": 15, "pass_epa": 63.12511217644537, "rush_yards_allowed": 1751, "rush_tds_allowed": 15, "pass_yards_allowed": 4259, "pass_tds_allowed": 27, "interceptions_forced": 8, "rush_ypg": 99.2, "rush_ypg_allowed": 103.0, "pass_ypg": 280.3, "pass_ypg_allowed": 250.5, "ppg": 23.4, "ppg_against": 23.5, "completion_pct": 63.0}, {"season": 2022, "team": "MIN", "points_for": 424, "points_against": 427, "games_played": 17, "rush_yards": 1661, "rush_tds": 18, "rush_carries": 404, "pass_yards": 4771, "pass_tds": 30, "pass_attempts": 668, "completions": 445, "interceptions": 15, "pass_epa": 33.113901692528245, "rush_yards_allowed": 2093, "rush_tds_allowed": 18, "pass_yards_allowed": 4756, "pass_tds_allowed": 23, "interceptions_forced": 15, "rush_ypg": 97.7, "rush_ypg_allowed": 123.1, "pass_ypg": 280.6, "pass_ypg_allowed": 279.8, "ppg": 24.9, "ppg_against": 25.1, "completion_pct": 66.6}, {"season": 2022, "team": "NE", "points_for": 364, "points_against": 347, "games_played": 17, "rush_yards": 1812, "rush_tds": 12, "rush_carries": 425, "pass_yards": 3815, "pass_tds": 19, "pass_attempts": 540, "completions": 358, "interceptions": 14, "pass_epa": -24.63569617834063, "rush_yards_allowed": 1793, "rush_tds_allowed": 7, "pass_yards_allowed": 4018, "pass_tds_allowed": 28, "interceptions_forced": 19, "rush_ypg": 106.6, "rush_ypg_allowed": 105.5, "pass_ypg": 224.4, "pass_ypg_allowed": 236.4, "ppg": 21.4, "ppg_against": 20.4, "completion_pct": 66.3}, {"season": 2022, "team": "NO", "points_for": 330, "points_against": 345, "games_played": 17, "rush_yards": 1982, "rush_tds": 12, "rush_carries": 465, "pass_yards": 3729, "pass_tds": 22, "pass_attempts": 493, "completions": 325, "interceptions": 14, "pass_epa": 13.083674062715582, "rush_yards_allowed": 2218, "rush_tds_allowed": 14, "pass_yards_allowed": 3400, "pass_tds_allowed": 17, "interceptions_forced": 7, "rush_ypg": 116.6, "rush_ypg_allowed": 130.5, "pass_ypg": 219.4, "pass_ypg_allowed": 200.0, "ppg": 19.4, "ppg_against": 20.3, "completion_pct": 65.9}, {"season": 2022, "team": "NYG", "points_for": 365, "points_against": 371, "games_played": 17, "rush_yards": 2519, "rush_tds": 21, "rush_carries": 520, "pass_yards": 3431, "pass_tds": 17, "pass_attempts": 520, "completions": 346, "interceptions": 6, "pass_epa": 15.312585324480201, "rush_yards_allowed": 2451, "rush_tds_allowed": 16, "pass_yards_allowed": 3909, "pass_tds_allowed": 21, "interceptions_forced": 6, "rush_ypg": 148.2, "rush_ypg_allowed": 144.2, "pass_ypg": 201.8, "pass_ypg_allowed": 229.9, "ppg": 21.5, "ppg_against": 21.8, "completion_pct": 66.5}, {"season": 2022, "team": "NYJ", "points_for": 296, "points_against": 316, "games_played": 17, "rush_yards": 1686, "rush_tds": 13, "rush_carries": 405, "pass_yards": 4021, "pass_tds": 14, "pass_attempts": 623, "completions": 355, "interceptions": 14, "pass_epa": -67.48036633048362, "rush_yards_allowed": 2068, "rush_tds_allowed": 14, "pass_yards_allowed": 3526, "pass_tds_allowed": 15, "interceptions_forced": 12, "rush_ypg": 99.2, "rush_ypg_allowed": 121.6, "pass_ypg": 236.5, "pass_ypg_allowed": 207.4, "ppg": 17.4, "ppg_against": 18.6, "completion_pct": 57.0}, {"season": 2022, "team": "PHI", "points_for": 477, "points_against": 344, "games_played": 17, "rush_yards": 2509, "rush_tds": 32, "rush_carries": 544, "pass_yards": 4364, "pass_tds": 25, "pass_attempts": 536, "completions": 350, "interceptions": 9, "pass_epa": 78.6956185892459, "rush_yards_allowed": 2068, "rush_tds_allowed": 15, "pass_yards_allowed": 3519, "pass_tds_allowed": 21, "interceptions_forced": 17, "rush_ypg": 147.6, "rush_ypg_allowed": 121.6, "pass_ypg": 256.7, "pass_ypg_allowed": 207.0, "ppg": 28.1, "ppg_against": 20.2, "completion_pct": 65.3}, {"season": 2022, "team": "PIT", "points_for": 308, "points_against": 346, "games_played": 17, "rush_yards": 2073, "rush_tds": 16, "rush_carries": 500, "pass_yards": 3656, "pass_tds": 11, "pass_attempts": 569, "completions": 362, "interceptions": 14, "pass_epa": -0.17643838987916638, "rush_yards_allowed": 1838, "rush_tds_allowed": 7, "pass_yards_allowed": 4064, "pass_tds_allowed": 28, "interceptions_forced": 20, "rush_ypg": 121.9, "rush_ypg_allowed": 108.1, "pass_ypg": 215.1, "pass_ypg_allowed": 239.1, "ppg": 18.1, "ppg_against": 20.4, "completion_pct": 63.6}, {"season": 2022, "team": "SEA", "points_for": 407, "points_against": 401, "games_played": 17, "rush_yards": 2042, "rush_tds": 12, "rush_carries": 425, "pass_yards": 4282, "pass_tds": 30, "pass_attempts": 572, "completions": 399, "interceptions": 11, "pass_epa": 26.879135374029335, "rush_yards_allowed": 2554, "rush_tds_allowed": 21, "pass_yards_allowed": 3863, "pass_tds_allowed": 22, "interceptions_forced": 13, "rush_ypg": 120.1, "rush_ypg_allowed": 150.2, "pass_ypg": 251.9, "pass_ypg_allowed": 227.2, "ppg": 23.9, "ppg_against": 23.6, "completion_pct": 69.8}, {"season": 2022, "team": "SF", "points_for": 450, "points_against": 277, "games_played": 17, "rush_yards": 2360, "rush_tds": 20, "rush_carries": 504, "pass_yards": 4015, "pass_tds": 29, "pass_attempts": 511, "completions": 337, "interceptions": 9, "pass_epa": 101.49797109822165, "rush_yards_allowed": 1321, "rush_tds_allowed": 11, "pass_yards_allowed": 4096, "pass_tds_allowed": 20, "interceptions_forced": 19, "rush_ypg": 138.8, "rush_ypg_allowed": 77.7, "pass_ypg": 236.2, "pass_ypg_allowed": 240.9, "ppg": 26.5, "ppg_against": 16.3, "completion_pct": 65.9}, {"season": 2022, "team": "TB", "points_for": 313, "points_against": 358, "games_played": 17, "rush_yards": 1308, "rush_tds": 5, "rush_carries": 386, "pass_yards": 4746, "pass_tds": 26, "pass_attempts": 750, "completions": 499, "interceptions": 9, "pass_epa": 55.10695433325534, "rush_yards_allowed": 2052, "rush_tds_allowed": 12, "pass_yards_allowed": 3767, "pass_tds_allowed": 29, "interceptions_forced": 10, "rush_ypg": 76.9, "rush_ypg_allowed": 120.7, "pass_ypg": 279.2, "pass_ypg_allowed": 221.6, "ppg": 18.4, "ppg_against": 21.1, "completion_pct": 66.5}, {"season": 2022, "team": "TEN", "points_for": 298, "points_against": 359, "games_played": 17, "rush_yards": 2131, "rush_tds": 16, "rush_carries": 487, "pass_yards": 3223, "pass_tds": 15, "pass_attempts": 454, "completions": 283, "interceptions": 11, "pass_epa": -27.042171176688488, "rush_yards_allowed": 1307, "rush_tds_allowed": 9, "pass_yards_allowed": 4931, "pass_tds_allowed": 29, "interceptions_forced": 14, "rush_ypg": 125.4, "rush_ypg_allowed": 76.9, "pass_ypg": 189.6, "pass_ypg_allowed": 290.1, "ppg": 17.5, "ppg_against": 21.1, "completion_pct": 62.3}, {"season": 2022, "team": "WAS", "points_for": 321, "points_against": 343, "games_played": 17, "rush_yards": 2143, "rush_tds": 9, "rush_carries": 538, "pass_yards": 3783, "pass_tds": 24, "pass_attempts": 554, "completions": 344, "interceptions": 16, "pass_epa": -60.09443042936727, "rush_yards_allowed": 1926, "rush_tds_allowed": 10, "pass_yards_allowed": 3531, "pass_tds_allowed": 26, "interceptions_forced": 9, "rush_ypg": 126.1, "rush_ypg_allowed": 113.3, "pass_ypg": 222.5, "pass_ypg_allowed": 207.7, "ppg": 18.9, "ppg_against": 20.2, "completion_pct": 62.1}, {"season": 2023, "team": "ARI", "points_for": 330, "points_against": 455, "games_played": 17, "rush_yards": 2365, "rush_tds": 17, "rush_carries": 471, "pass_yards": 3430, "pass_tds": 18, "pass_attempts": 555, "completions": 355, "interceptions": 12, "pass_epa": -100.87641951710708, "rush_yards_allowed": 2434, "rush_tds_allowed": 19, "pass_yards_allowed": 3829, "pass_tds_allowed": 32, "interceptions_forced": 11, "rush_ypg": 139.1, "rush_ypg_allowed": 143.2, "pass_ypg": 201.8, "pass_ypg_allowed": 225.2, "ppg": 19.4, "ppg_against": 26.8, "completion_pct": 64.0}, {"season": 2023, "team": "ATL", "points_for": 321, "points_against": 373, "games_played": 17, "rush_yards": 2159, "rush_tds": 14, "rush_carries": 522, "pass_yards": 3753, "pass_tds": 17, "pass_attempts": 528, "completions": 326, "interceptions": 17, "pass_epa": -43.96359538601183, "rush_yards_allowed": 2009, "rush_tds_allowed": 11, "pass_yards_allowed": 3707, "pass_tds_allowed": 24, "interceptions_forced": 8, "rush_ypg": 127.0, "rush_ypg_allowed": 118.2, "pass_ypg": 220.8, "pass_ypg_allowed": 218.1, "ppg": 18.9, "ppg_against": 21.9, "completion_pct": 61.7}, {"season": 2023, "team": "BAL", "points_for": 483, "points_against": 280, "games_played": 17, "rush_yards": 2661, "rush_tds": 26, "rush_carries": 541, "pass_yards": 3881, "pass_tds": 27, "pass_attempts": 494, "completions": 328, "interceptions": 7, "pass_epa": 62.87204310512697, "rush_yards_allowed": 1860, "rush_tds_allowed": 6, "pass_yards_allowed": 3717, "pass_tds_allowed": 18, "interceptions_forced": 18, "rush_ypg": 156.5, "rush_ypg_allowed": 109.4, "pass_ypg": 228.3, "pass_ypg_allowed": 218.6, "ppg": 28.4, "ppg_against": 16.5, "completion_pct": 66.4}, {"season": 2023, "team": "BUF", "points_for": 451, "points_against": 311, "games_played": 17, "rush_yards": 2212, "rush_tds": 22, "rush_carries": 512, "pass_yards": 4306, "pass_tds": 29, "pass_attempts": 579, "completions": 385, "interceptions": 18, "pass_epa": 91.6927982197074, "rush_yards_allowed": 1880, "rush_tds_allowed": 14, "pass_yards_allowed": 3658, "pass_tds_allowed": 18, "interceptions_forced": 18, "rush_ypg": 130.1, "rush_ypg_allowed": 110.6, "pass_ypg": 253.3, "pass_ypg_allowed": 215.2, "ppg": 26.5, "ppg_against": 18.3, "completion_pct": 66.5}, {"season": 2023, "team": "CAR", "points_for": 236, "points_against": 416, "games_played": 17, "rush_yards": 1769, "rush_tds": 7, "rush_carries": 445, "pass_yards": 3238, "pass_tds": 13, "pass_attempts": 585, "completions": 349, "interceptions": 10, "pass_epa": -154.72511228351, "rush_yards_allowed": 2081, "rush_tds_allowed": 25, "pass_yards_allowed": 3101, "pass_tds_allowed": 19, "interceptions_forced": 8, "rush_ypg": 104.1, "rush_ypg_allowed": 122.4, "pass_ypg": 190.5, "pass_ypg_allowed": 182.4, "ppg": 13.9, "ppg_against": 24.5, "completion_pct": 59.7}, {"season": 2023, "team": "CHI", "points_for": 360, "points_against": 379, "games_played": 17, "rush_yards": 2399, "rush_tds": 16, "rush_carries": 534, "pass_yards": 3421, "pass_tds": 19, "pass_attempts": 513, "completions": 321, "interceptions": 15, "pass_epa": -64.64965049815295, "rush_yards_allowed": 1468, "rush_tds_allowed": 8, "pass_yards_allowed": 4242, "pass_tds_allowed": 30, "interceptions_forced": 22, "rush_ypg": 141.1, "rush_ypg_allowed": 86.4, "pass_ypg": 201.2, "pass_ypg_allowed": 249.5, "ppg": 21.2, "ppg_against": 22.3, "completion_pct": 62.6}, {"season": 2023, "team": "CIN", "points_for": 366, "points_against": 384, "games_played": 17, "rush_yards": 1527, "rush_tds": 12, "rush_carries": 383, "pass_yards": 4264, "pass_tds": 27, "pass_attempts": 613, "completions": 419, "interceptions": 13, "pass_epa": 24.196042150937096, "rush_yards_allowed": 2145, "rush_tds_allowed": 17, "pass_yards_allowed": 4478, "pass_tds_allowed": 22, "interceptions_forced": 17, "rush_ypg": 89.8, "rush_ypg_allowed": 126.2, "pass_ypg": 250.8, "pass_ypg_allowed": 263.4, "ppg": 21.5, "ppg_against": 22.6, "completion_pct": 68.4}, {"season": 2023, "team": "CLE", "points_for": 396, "points_against": 362, "games_played": 17, "rush_yards": 2017, "rush_tds": 15, "rush_carries": 518, "pass_yards": 4011, "pass_tds": 24, "pass_attempts": 624, "completions": 355, "interceptions": 23, "pass_epa": -104.95382046867533, "rush_yards_allowed": 1793, "rush_tds_allowed": 15, "pass_yards_allowed": 3149, "pass_tds_allowed": 23, "interceptions_forced": 18, "rush_ypg": 118.6, "rush_ypg_allowed": 105.5, "pass_ypg": 235.9, "pass_ypg_allowed": 185.2, "ppg": 23.3, "ppg_against": 21.3, "completion_pct": 56.9}, {"season": 2023, "team": "DAL", "points_for": 509, "points_against": 315, "games_played": 17, "rush_yards": 1920, "rush_tds": 14, "rush_carries": 468, "pass_yards": 4660, "pass_tds": 36, "pass_attempts": 614, "completions": 428, "interceptions": 10, "pass_epa": 115.55511704054335, "rush_yards_allowed": 1910, "rush_tds_allowed": 14, "pass_yards_allowed": 3418, "pass_tds_allowed": 21, "interceptions_forced": 17, "rush_ypg": 112.9, "rush_ypg_allowed": 112.4, "pass_ypg": 274.1, "pass_ypg_allowed": 201.1, "ppg": 29.9, "ppg_against": 18.5, "completion_pct": 69.7}, {"season": 2023, "team": "DEN", "points_for": 357, "points_against": 413, "games_played": 17, "rush_yards": 1810, "rush_tds": 8, "rush_carries": 451, "pass_yards": 3566, "pass_tds": 28, "pass_attempts": 513, "completions": 337, "interceptions": 9, "pass_epa": -10.123776328163341, "rush_yards_allowed": 2331, "rush_tds_allowed": 15, "pass_yards_allowed": 4288, "pass_tds_allowed": 29, "interceptions_forced": 11, "rush_ypg": 106.5, "rush_ypg_allowed": 137.1, "pass_ypg": 209.8, "pass_ypg_allowed": 252.2, "ppg": 21.0, "ppg_against": 24.3, "completion_pct": 65.7}, {"season": 2023, "team": "DET", "points_for": 461, "points_against": 395, "games_played": 17, "rush_yards": 2311, "rush_tds": 27, "rush_carries": 500, "pass_yards": 4575, "pass_tds": 30, "pass_attempts": 605, "completions": 407, "interceptions": 12, "pass_epa": 80.94225091908035, "rush_yards_allowed": 1509, "rush_tds_allowed": 15, "pass_yards_allowed": 4562, "pass_tds_allowed": 28, "interceptions_forced": 16, "rush_ypg": 135.9, "rush_ypg_allowed": 88.8, "pass_ypg": 269.1, "pass_ypg_allowed": 268.4, "ppg": 27.1, "ppg_against": 23.2, "completion_pct": 67.3}, {"season": 2023, "team": "GB", "points_for": 383, "points_against": 350, "games_played": 17, "rush_yards": 1905, "rush_tds": 10, "rush_carries": 441, "pass_yards": 4196, "pass_tds": 32, "pass_attempts": 580, "completions": 373, "interceptions": 11, "pass_epa": 90.16721131141803, "rush_yards_allowed": 2181, "rush_tds_allowed": 15, "pass_yards_allowed": 3803, "pass_tds_allowed": 21, "interceptions_forced": 7, "rush_ypg": 112.1, "rush_ypg_allowed": 128.3, "pass_ypg": 246.8, "pass_ypg_allowed": 223.7, "ppg": 22.5, "ppg_against": 20.6, "completion_pct": 64.3}, {"season": 2023, "team": "HOU", "points_for": 377, "points_against": 353, "games_played": 17, "rush_yards": 1647, "rush_tds": 10, "rush_carries": 444, "pass_yards": 4572, "pass_tds": 26, "pass_attempts": 591, "completions": 371, "interceptions": 8, "pass_epa": 36.30426573075351, "rush_yards_allowed": 1643, "rush_tds_allowed": 19, "pass_yards_allowed": 4308, "pass_tds_allowed": 17, "interceptions_forced": 14, "rush_ypg": 96.9, "rush_ypg_allowed": 96.6, "pass_ypg": 268.9, "pass_ypg_allowed": 253.4, "ppg": 22.2, "ppg_against": 20.8, "completion_pct": 62.8}, {"season": 2023, "team": "IND", "points_for": 396, "points_against": 415, "games_played": 17, "rush_yards": 2059, "rush_tds": 19, "rush_carries": 479, "pass_yards": 3882, "pass_tds": 18, "pass_attempts": 574, "completions": 355, "interceptions": 10, "pass_epa": 0.1010847334187579, "rush_yards_allowed": 2105, "rush_tds_allowed": 22, "pass_yards_allowed": 4113, "pass_tds_allowed": 21, "interceptions_forced": 15, "rush_ypg": 121.1, "rush_ypg_allowed": 123.8, "pass_ypg": 228.4, "pass_ypg_allowed": 241.9, "ppg": 23.3, "ppg_against": 24.4, "completion_pct": 61.8}, {"season": 2023, "team": "JAX", "points_for": 377, "points_against": 371, "games_played": 17, "rush_yards": 1646, "rush_tds": 17, "rush_carries": 453, "pass_yards": 4365, "pass_tds": 22, "pass_attempts": 617, "completions": 410, "interceptions": 14, "pass_epa": 4.57002884829216, "rush_yards_allowed": 1752, "rush_tds_allowed": 15, "pass_yards_allowed": 4362, "pass_tds_allowed": 27, "interceptions_forced": 15, "rush_ypg": 96.8, "rush_ypg_allowed": 103.1, "pass_ypg": 256.8, "pass_ypg_allowed": 256.6, "ppg": 22.2, "ppg_against": 21.8, "completion_pct": 66.5}, {"season": 2023, "team": "KC", "points_for": 371, "points_against": 294, "games_played": 17, "rush_yards": 1784, "rush_tds": 9, "rush_carries": 417, "pass_yards": 4368, "pass_tds": 27, "pass_attempts": 632, "completions": 419, "interceptions": 17, "pass_epa": 34.81822858517423, "rush_yards_allowed": 1925, "rush_tds_allowed": 10, "pass_yards_allowed": 3353, "pass_tds_allowed": 19, "interceptions_forced": 8, "rush_ypg": 104.9, "rush_ypg_allowed": 113.2, "pass_ypg": 256.9, "pass_ypg_allowed": 197.2, "ppg": 21.8, "ppg_against": 17.3, "completion_pct": 66.3}, {"season": 2023, "team": "LA", "points_for": 404, "points_against": 377, "games_played": 17, "rush_yards": 2045, "rush_tds": 18, "rush_carries": 477, "pass_yards": 4300, "pass_tds": 26, "pass_attempts": 583, "completions": 361, "interceptions": 13, "pass_epa": 42.58366943192901, "rush_yards_allowed": 1816, "rush_tds_allowed": 14, "pass_yards_allowed": 4195, "pass_tds_allowed": 24, "interceptions_forced": 10, "rush_ypg": 120.3, "rush_ypg_allowed": 106.8, "pass_ypg": 252.9, "pass_ypg_allowed": 246.8, "ppg": 23.8, "ppg_against": 22.2, "completion_pct": 61.9}, {"season": 2023, "team": "LAC", "points_for": 346, "points_against": 398, "games_played": 17, "rush_yards": 1642, "rush_tds": 11, "rush_carries": 431, "pass_yards": 4263, "pass_tds": 23, "pass_attempts": 630, "completions": 408, "interceptions": 8, "pass_epa": -6.095130592935904, "rush_yards_allowed": 1924, "rush_tds_allowed": 18, "pass_yards_allowed": 4568, "pass_tds_allowed": 25, "interceptions_forced": 9, "rush_ypg": 96.6, "rush_ypg_allowed": 113.2, "pass_ypg": 250.8, "pass_ypg_allowed": 268.7, "ppg": 20.4, "ppg_against": 23.4, "completion_pct": 64.8}, {"season": 2023, "team": "LV", "points_for": 332, "points_against": 331, "games_played": 17, "rush_yards": 1542, "rush_tds": 11, "rush_carries": 413, "pass_yards": 3654, "pass_tds": 19, "pass_attempts": 554, "completions": 346, "interceptions": 18, "pass_epa": -44.689015956674936, "rush_yards_allowed": 2015, "rush_tds_allowed": 15, "pass_yards_allowed": 3889, "pass_tds_allowed": 21, "interceptions_forced": 13, "rush_ypg": 90.7, "rush_ypg_allowed": 118.5, "pass_ypg": 214.9, "pass_ypg_allowed": 228.8, "ppg": 19.5, "ppg_against": 19.5, "completion_pct": 62.5}, {"season": 2023, "team": "MIA", "points_for": 496, "points_against": 391, "games_played": 17, "rush_yards": 2308, "rush_tds": 27, "rush_carries": 456, "pass_yards": 4698, "pass_tds": 30, "pass_attempts": 566, "completions": 393, "interceptions": 15, "pass_epa": 114.43344457023831, "rush_yards_allowed": 1650, "rush_tds_allowed": 15, "pass_yards_allowed": 4125, "pass_tds_allowed": 27, "interceptions_forced": 15, "rush_ypg": 135.8, "rush_ypg_allowed": 97.1, "pass_ypg": 276.4, "pass_ypg_allowed": 242.6, "ppg": 29.2, "ppg_against": 23.0, "completion_pct": 69.4}, {"season": 2023, "team": "MIN", "points_for": 344, "points_against": 362, "games_played": 17, "rush_yards": 1553, "rush_tds": 7, "rush_carries": 393, "pass_yards": 4700, "pass_tds": 30, "pass_attempts": 630, "completions": 424, "interceptions": 19, "pass_epa": 4.593621540816949, "rush_yards_allowed": 1678, "rush_tds_allowed": 14, "pass_yards_allowed": 4239, "pass_tds_allowed": 22, "interceptions_forced": 11, "rush_ypg": 91.4, "rush_ypg_allowed": 98.7, "pass_ypg": 276.5, "pass_ypg_allowed": 249.4, "ppg": 20.2, "ppg_against": 21.3, "completion_pct": 67.3}, {"season": 2023, "team": "NE", "points_for": 236, "points_against": 366, "games_played": 17, "rush_yards": 1627, "rush_tds": 9, "rush_carries": 415, "pass_yards": 3392, "pass_tds": 16, "pass_attempts": 557, "completions": 351, "interceptions": 21, "pass_epa": -136.4970539970651, "rush_yards_allowed": 1584, "rush_tds_allowed": 14, "pass_yards_allowed": 3787, "pass_tds_allowed": 18, "interceptions_forced": 10, "rush_ypg": 95.7, "rush_ypg_allowed": 93.2, "pass_ypg": 199.5, "pass_ypg_allowed": 222.8, "ppg": 13.9, "ppg_against": 21.5, "completion_pct": 63.0}, {"season": 2023, "team": "NO", "points_for": 402, "points_against": 327, "games_played": 17, "rush_yards": 1742, "rush_tds": 13, "rush_carries": 480, "pass_yards": 4142, "pass_tds": 27, "pass_attempts": 595, "completions": 400, "interceptions": 11, "pass_epa": 18.23603773879033, "rush_yards_allowed": 2038, "rush_tds_allowed": 10, "pass_yards_allowed": 3755, "pass_tds_allowed": 22, "interceptions_forced": 18, "rush_ypg": 102.5, "rush_ypg_allowed": 119.9, "pass_ypg": 243.6, "pass_ypg_allowed": 220.9, "ppg": 23.6, "ppg_against": 19.2, "completion_pct": 67.2}, {"season": 2023, "team": "NYG", "points_for": 266, "points_against": 407, "games_played": 17, "rush_yards": 1874, "rush_tds": 10, "rush_carries": 454, "pass_yards": 3351, "pass_tds": 15, "pass_attempts": 518, "completions": 338, "interceptions": 12, "pass_epa": -109.55522071400868, "rush_yards_allowed": 2251, "rush_tds_allowed": 24, "pass_yards_allowed": 4157, "pass_tds_allowed": 21, "interceptions_forced": 18, "rush_ypg": 110.2, "rush_ypg_allowed": 132.4, "pass_ypg": 197.1, "pass_ypg_allowed": 244.5, "ppg": 15.6, "ppg_against": 23.9, "completion_pct": 65.3}, {"season": 2023, "team": "NYJ", "points_for": 268, "points_against": 355, "games_played": 17, "rush_yards": 1647, "rush_tds": 7, "rush_carries": 388, "pass_yards": 3355, "pass_tds": 11, "pass_attempts": 599, "completions": 355, "interceptions": 15, "pass_epa": -188.8083948196641, "rush_yards_allowed": 2108, "rush_tds_allowed": 14, "pass_yards_allowed": 3182, "pass_tds_allowed": 19, "interceptions_forced": 17, "rush_ypg": 96.9, "rush_ypg_allowed": 124.0, "pass_ypg": 197.4, "pass_ypg_allowed": 187.2, "ppg": 15.8, "ppg_against": 20.9, "completion_pct": 59.3}, {"season": 2023, "team": "PHI", "points_for": 433, "points_against": 428, "games_played": 17, "rush_yards": 2190, "rush_tds": 22, "rush_carries": 510, "pass_yards": 4022, "pass_tds": 24, "pass_attempts": 561, "completions": 367, "interceptions": 16, "pass_epa": 57.274626131607675, "rush_yards_allowed": 1758, "rush_tds_allowed": 13, "pass_yards_allowed": 4551, "pass_tds_allowed": 35, "interceptions_forced": 9, "rush_ypg": 128.8, "rush_ypg_allowed": 103.4, "pass_ypg": 236.6, "pass_ypg_allowed": 267.7, "ppg": 25.5, "ppg_against": 25.2, "completion_pct": 65.4}, {"season": 2023, "team": "PIT", "points_for": 304, "points_against": 324, "games_played": 17, "rush_yards": 2010, "rush_tds": 16, "rush_carries": 487, "pass_yards": 3421, "pass_tds": 13, "pass_attempts": 505, "completions": 323, "interceptions": 9, "pass_epa": -45.45974859432607, "rush_yards_allowed": 1956, "rush_tds_allowed": 9, "pass_yards_allowed": 4158, "pass_tds_allowed": 22, "interceptions_forced": 16, "rush_ypg": 118.2, "rush_ypg_allowed": 115.1, "pass_ypg": 201.2, "pass_ypg_allowed": 244.6, "ppg": 17.9, "ppg_against": 19.1, "completion_pct": 64.0}, {"season": 2023, "team": "SEA", "points_for": 364, "points_against": 402, "games_played": 17, "rush_yards": 1580, "rush_tds": 11, "rush_carries": 382, "pass_yards": 4167, "pass_tds": 23, "pass_attempts": 575, "completions": 371, "interceptions": 12, "pass_epa": 32.94581372307631, "rush_yards_allowed": 2352, "rush_tds_allowed": 24, "pass_yards_allowed": 4247, "pass_tds_allowed": 20, "interceptions_forced": 11, "rush_ypg": 92.9, "rush_ypg_allowed": 138.4, "pass_ypg": 245.1, "pass_ypg_allowed": 249.8, "ppg": 21.4, "ppg_against": 23.6, "completion_pct": 64.5}, {"season": 2023, "team": "SF", "points_for": 491, "points_against": 298, "games_played": 17, "rush_yards": 2389, "rush_tds": 27, "rush_carries": 499, "pass_yards": 4577, "pass_tds": 33, "pass_attempts": 490, "completions": 336, "interceptions": 12, "pass_epa": 143.49140184807177, "rush_yards_allowed": 1525, "rush_tds_allowed": 10, "pass_yards_allowed": 3949, "pass_tds_allowed": 20, "interceptions_forced": 22, "rush_ypg": 140.5, "rush_ypg_allowed": 89.7, "pass_ypg": 269.2, "pass_ypg_allowed": 232.3, "ppg": 28.9, "ppg_against": 17.5, "completion_pct": 68.6}, {"season": 2023, "team": "TB", "points_for": 348, "points_against": 325, "games_played": 17, "rush_yards": 1509, "rush_tds": 8, "rush_carries": 439, "pass_yards": 4044, "pass_tds": 28, "pass_attempts": 567, "completions": 364, "interceptions": 10, "pass_epa": 47.94487562788637, "rush_yards_allowed": 1620, "rush_tds_allowed": 11, "pass_yards_allowed": 4544, "pass_tds_allowed": 23, "interceptions_forced": 13, "rush_ypg": 88.8, "rush_ypg_allowed": 95.3, "pass_ypg": 237.9, "pass_ypg_allowed": 267.3, "ppg": 20.5, "ppg_against": 19.1, "completion_pct": 64.2}, {"season": 2023, "team": "TEN", "points_for": 305, "points_against": 367, "games_played": 17, "rush_yards": 1846, "rush_tds": 16, "rush_carries": 444, "pass_yards": 3498, "pass_tds": 12, "pass_attempts": 490, "completions": 302, "interceptions": 11, "pass_epa": -35.76813543841837, "rush_yards_allowed": 1831, "rush_tds_allowed": 10, "pass_yards_allowed": 4181, "pass_tds_allowed": 20, "interceptions_forced": 6, "rush_ypg": 108.6, "rush_ypg_allowed": 107.7, "pass_ypg": 205.8, "pass_ypg_allowed": 245.9, "ppg": 17.9, "ppg_against": 21.6, "completion_pct": 61.6}, {"season": 2023, "team": "WAS", "points_for": 329, "points_against": 518, "games_played": 17, "rush_yards": 1592, "rush_tds": 14, "rush_carries": 359, "pass_yards": 4170, "pass_tds": 24, "pass_attempts": 635, "completions": 406, "interceptions": 21, "pass_epa": -87.17944283138212, "rush_yards_allowed": 2155, "rush_tds_allowed": 15, "pass_yards_allowed": 4627, "pass_tds_allowed": 39, "interceptions_forced": 8, "rush_ypg": 93.6, "rush_ypg_allowed": 126.8, "pass_ypg": 245.3, "pass_ypg_allowed": 272.2, "ppg": 19.4, "ppg_against": 30.5, "completion_pct": 63.9}, {"season": 2024, "team": "ARI", "points_for": 400, "points_against": 379, "games_played": 17, "rush_yards": 2451, "rush_tds": 18, "rush_carries": 463, "pass_yards": 3859, "pass_tds": 21, "pass_attempts": 543, "completions": 374, "interceptions": 11, "pass_epa": 64.52634920272747, "rush_yards_allowed": 2149, "rush_tds_allowed": 18, "pass_yards_allowed": 3930, "pass_tds_allowed": 20, "interceptions_forced": 9, "rush_ypg": 144.2, "rush_ypg_allowed": 126.4, "pass_ypg": 227.0, "pass_ypg_allowed": 231.2, "ppg": 23.5, "ppg_against": 22.3, "completion_pct": 68.9}, {"season": 2024, "team": "ATL", "points_for": 389, "points_against": 423, "games_played": 17, "rush_yards": 2219, "rush_tds": 18, "rush_carries": 495, "pass_yards": 4283, "pass_tds": 21, "pass_attempts": 558, "completions": 364, "interceptions": 19, "pass_epa": 35.687504974347796, "rush_yards_allowed": 2051, "rush_tds_allowed": 11, "pass_yards_allowed": 3947, "pass_tds_allowed": 34, "interceptions_forced": 12, "rush_ypg": 130.5, "rush_ypg_allowed": 120.6, "pass_ypg": 251.9, "pass_ypg_allowed": 232.2, "ppg": 22.9, "ppg_against": 24.9, "completion_pct": 65.2}, {"season": 2024, "team": "BAL", "points_for": 518, "points_against": 361, "games_played": 17, "rush_yards": 3189, "rush_tds": 21, "rush_carries": 554, "pass_yards": 4189, "pass_tds": 41, "pass_attempts": 477, "completions": 318, "interceptions": 4, "pass_epa": 170.4688761450539, "rush_yards_allowed": 1361, "rush_tds_allowed": 12, "pass_yards_allowed": 4466, "pass_tds_allowed": 26, "interceptions_forced": 12, "rush_ypg": 187.6, "rush_ypg_allowed": 80.1, "pass_ypg": 246.4, "pass_ypg_allowed": 262.7, "ppg": 30.5, "ppg_against": 21.2, "completion_pct": 66.7}, {"season": 2024, "team": "BUF", "points_for": 525, "points_against": 368, "games_played": 17, "rush_yards": 2230, "rush_tds": 32, "rush_carries": 491, "pass_yards": 3938, "pass_tds": 30, "pass_attempts": 520, "completions": 329, "interceptions": 6, "pass_epa": 132.6717167393229, "rush_yards_allowed": 1963, "rush_tds_allowed": 13, "pass_yards_allowed": 4100, "pass_tds_allowed": 28, "interceptions_forced": 16, "rush_ypg": 131.2, "rush_ypg_allowed": 115.5, "pass_ypg": 231.6, "pass_ypg_allowed": 241.2, "ppg": 30.9, "ppg_against": 21.6, "completion_pct": 63.3}, {"season": 2024, "team": "CAR", "points_for": 341, "points_against": 534, "games_played": 17, "rush_yards": 1878, "rush_tds": 18, "rush_carries": 410, "pass_yards": 3392, "pass_tds": 22, "pass_attempts": 544, "completions": 340, "interceptions": 15, "pass_epa": -44.90949003105797, "rush_yards_allowed": 3057, "rush_tds_allowed": 24, "pass_yards_allowed": 4012, "pass_tds_allowed": 35, "interceptions_forced": 9, "rush_ypg": 110.5, "rush_ypg_allowed": 179.8, "pass_ypg": 199.5, "pass_ypg_allowed": 236.0, "ppg": 20.1, "ppg_against": 31.4, "completion_pct": 62.5}, {"season": 2024, "team": "CHI", "points_for": 310, "points_against": 370, "games_played": 17, "rush_yards": 1734, "rush_tds": 13, "rush_carries": 431, "pass_yards": 3552, "pass_tds": 20, "pass_attempts": 564, "completions": 353, "interceptions": 6, "pass_epa": -46.95597575449813, "rush_yards_allowed": 2317, "rush_tds_allowed": 20, "pass_yards_allowed": 3959, "pass_tds_allowed": 17, "interceptions_forced": 11, "rush_ypg": 102.0, "rush_ypg_allowed": 136.3, "pass_ypg": 208.9, "pass_ypg_allowed": 232.9, "ppg": 18.2, "ppg_against": 21.8, "completion_pct": 62.6}, {"season": 2024, "team": "CIN", "points_for": 472, "points_against": 434, "games_played": 17, "rush_yards": 1574, "rush_tds": 11, "rush_carries": 380, "pass_yards": 4918, "pass_tds": 43, "pass_attempts": 652, "completions": 460, "interceptions": 9, "pass_epa": 115.12695542445556, "rush_yards_allowed": 2122, "rush_tds_allowed": 20, "pass_yards_allowed": 4016, "pass_tds_allowed": 30, "interceptions_forced": 15, "rush_ypg": 92.6, "rush_ypg_allowed": 124.8, "pass_ypg": 289.3, "pass_ypg_allowed": 236.2, "ppg": 27.8, "ppg_against": 25.5, "completion_pct": 70.6}, {"season": 2024, "team": "CLE", "points_for": 258, "points_against": 435, "games_played": 17, "rush_yards": 1608, "rush_tds": 8, "rush_carries": 391, "pass_yards": 3879, "pass_tds": 19, "pass_attempts": 661, "completions": 395, "interceptions": 23, "pass_epa": -175.00518532804432, "rush_yards_allowed": 2205, "rush_tds_allowed": 22, "pass_yards_allowed": 3860, "pass_tds_allowed": 26, "interceptions_forced": 3, "rush_ypg": 94.6, "rush_ypg_allowed": 129.7, "pass_ypg": 228.2, "pass_ypg_allowed": 227.1, "ppg": 15.2, "ppg_against": 25.6, "completion_pct": 59.8}, {"season": 2024, "team": "DAL", "points_for": 350, "points_against": 468, "games_played": 17, "rush_yards": 1705, "rush_tds": 6, "rush_carries": 429, "pass_yards": 4088, "pass_tds": 23, "pass_attempts": 635, "completions": 397, "interceptions": 14, "pass_epa": -40.49023784757417, "rush_yards_allowed": 2331, "rush_tds_allowed": 25, "pass_yards_allowed": 4045, "pass_tds_allowed": 28, "interceptions_forced": 13, "rush_ypg": 100.3, "rush_ypg_allowed": 137.1, "pass_ypg": 240.5, "pass_ypg_allowed": 237.9, "ppg": 20.6, "ppg_against": 27.5, "completion_pct": 62.5}, {"season": 2024, "team": "DEN", "points_for": 425, "points_against": 311, "games_played": 17, "rush_yards": 1908, "rush_tds": 12, "rush_carries": 461, "pass_yards": 3775, "pass_tds": 29, "pass_attempts": 567, "completions": 376, "interceptions": 12, "pass_epa": 34.441007298895755, "rush_yards_allowed": 1639, "rush_tds_allowed": 10, "pass_yards_allowed": 4078, "pass_tds_allowed": 22, "interceptions_forced": 15, "rush_ypg": 112.2, "rush_ypg_allowed": 96.4, "pass_ypg": 222.1, "pass_ypg_allowed": 239.9, "ppg": 25.0, "ppg_against": 18.3, "completion_pct": 66.3}, {"season": 2024, "team": "DET", "points_for": 564, "points_against": 342, "games_played": 17, "rush_yards": 2488, "rush_tds": 29, "rush_carries": 534, "pass_yards": 4691, "pass_tds": 37, "pass_attempts": 548, "completions": 396, "interceptions": 12, "pass_epa": 166.47780212337344, "rush_yards_allowed": 1672, "rush_tds_allowed": 18, "pass_yards_allowed": 4404, "pass_tds_allowed": 18, "interceptions_forced": 16, "rush_ypg": 146.4, "rush_ypg_allowed": 98.4, "pass_ypg": 275.9, "pass_ypg_allowed": 259.1, "ppg": 33.2, "ppg_against": 20.1, "completion_pct": 72.3}, {"season": 2024, "team": "GB", "points_for": 460, "points_against": 338, "games_played": 17, "rush_yards": 2496, "rush_tds": 23, "rush_carries": 526, "pass_yards": 3939, "pass_tds": 28, "pass_attempts": 479, "completions": 308, "interceptions": 11, "pass_epa": 77.43815873048723, "rush_yards_allowed": 1689, "rush_tds_allowed": 13, "pass_yards_allowed": 3959, "pass_tds_allowed": 23, "interceptions_forced": 16, "rush_ypg": 146.8, "rush_ypg_allowed": 99.4, "pass_ypg": 231.7, "pass_ypg_allowed": 232.9, "ppg": 27.1, "ppg_against": 19.9, "completion_pct": 64.3}, {"season": 2024, "team": "HOU", "points_for": 372, "points_against": 372, "games_played": 17, "rush_yards": 1909, "rush_tds": 15, "rush_carries": 434, "pass_yards": 3939, "pass_tds": 20, "pass_attempts": 568, "completions": 356, "interceptions": 12, "pass_epa": -18.32079174939538, "rush_yards_allowed": 1938, "rush_tds_allowed": 11, "pass_yards_allowed": 3749, "pass_tds_allowed": 31, "interceptions_forced": 19, "rush_ypg": 112.3, "rush_ypg_allowed": 114.0, "pass_ypg": 231.7, "pass_ypg_allowed": 220.5, "ppg": 21.9, "ppg_against": 21.9, "completion_pct": 62.7}, {"season": 2024, "team": "IND", "points_for": 377, "points_against": 427, "games_played": 17, "rush_yards": 2331, "rush_tds": 20, "rush_carries": 496, "pass_yards": 3575, "pass_tds": 20, "pass_attempts": 512, "completions": 288, "interceptions": 19, "pass_epa": -37.112830314735824, "rush_yards_allowed": 2241, "rush_tds_allowed": 18, "pass_yards_allowed": 4120, "pass_tds_allowed": 27, "interceptions_forced": 16, "rush_ypg": 137.1, "rush_ypg_allowed": 131.8, "pass_ypg": 210.3, "pass_ypg_allowed": 242.4, "ppg": 22.2, "ppg_against": 25.1, "completion_pct": 56.2}, {"season": 2024, "team": "JAX", "points_for": 320, "points_against": 435, "games_played": 17, "rush_yards": 1729, "rush_tds": 13, "rush_carries": 414, "pass_yards": 3717, "pass_tds": 19, "pass_attempts": 546, "completions": 343, "interceptions": 15, "pass_epa": 2.8151029561769283, "rush_yards_allowed": 2254, "rush_tds_allowed": 19, "pass_yards_allowed": 4581, "pass_tds_allowed": 29, "interceptions_forced": 6, "rush_ypg": 101.7, "rush_ypg_allowed": 132.6, "pass_ypg": 218.6, "pass_ypg_allowed": 269.5, "ppg": 18.8, "ppg_against": 25.6, "completion_pct": 62.8}, {"season": 2024, "team": "KC", "points_for": 385, "points_against": 326, "games_played": 17, "rush_yards": 1790, "rush_tds": 15, "rush_carries": 450, "pass_yards": 4046, "pass_tds": 26, "pass_attempts": 600, "completions": 404, "interceptions": 11, "pass_epa": 62.98777838726702, "rush_yards_allowed": 1731, "rush_tds_allowed": 13, "pass_yards_allowed": 3970, "pass_tds_allowed": 24, "interceptions_forced": 13, "rush_ypg": 105.3, "rush_ypg_allowed": 101.8, "pass_ypg": 238.0, "pass_ypg_allowed": 233.5, "ppg": 22.6, "ppg_against": 19.2, "completion_pct": 67.3}, {"season": 2024, "team": "LA", "points_for": 367, "points_against": 386, "games_played": 17, "rush_yards": 1765, "rush_tds": 15, "rush_carries": 450, "pass_yards": 4096, "pass_tds": 22, "pass_attempts": 558, "completions": 367, "interceptions": 9, "pass_epa": 34.93004952278433, "rush_yards_allowed": 2210, "rush_tds_allowed": 13, "pass_yards_allowed": 4101, "pass_tds_allowed": 29, "interceptions_forced": 13, "rush_ypg": 103.8, "rush_ypg_allowed": 130.0, "pass_ypg": 240.9, "pass_ypg_allowed": 241.2, "ppg": 21.6, "ppg_against": 22.7, "completion_pct": 65.8}, {"season": 2024, "team": "LAC", "points_for": 402, "points_against": 301, "games_played": 17, "rush_yards": 1882, "rush_tds": 17, "rush_carries": 463, "pass_yards": 3898, "pass_tds": 23, "pass_attempts": 509, "completions": 335, "interceptions": 3, "pass_epa": 66.16523927911186, "rush_yards_allowed": 1997, "rush_tds_allowed": 7, "pass_yards_allowed": 3759, "pass_tds_allowed": 24, "interceptions_forced": 15, "rush_ypg": 110.7, "rush_ypg_allowed": 117.5, "pass_ypg": 229.3, "pass_ypg_allowed": 221.1, "ppg": 23.6, "ppg_against": 17.7, "completion_pct": 65.8}, {"season": 2024, "team": "LV", "points_for": 309, "points_against": 434, "games_played": 17, "rush_yards": 1357, "rush_tds": 10, "rush_carries": 380, "pass_yards": 4083, "pass_tds": 19, "pass_attempts": 634, "completions": 409, "interceptions": 16, "pass_epa": -65.68362248825487, "rush_yards_allowed": 1987, "rush_tds_allowed": 14, "pass_yards_allowed": 3989, "pass_tds_allowed": 29, "interceptions_forced": 10, "rush_ypg": 79.8, "rush_ypg_allowed": 116.9, "pass_ypg": 240.2, "pass_ypg_allowed": 234.6, "ppg": 18.2, "ppg_against": 25.5, "completion_pct": 64.5}, {"season": 2024, "team": "MIA", "points_for": 345, "points_against": 364, "games_played": 17, "rush_yards": 1795, "rush_tds": 12, "rush_carries": 448, "pass_yards": 4036, "pass_tds": 22, "pass_attempts": 591, "completions": 413, "interceptions": 10, "pass_epa": 43.481886431862954, "rush_yards_allowed": 1763, "rush_tds_allowed": 12, "pass_yards_allowed": 3829, "pass_tds_allowed": 22, "interceptions_forced": 10, "rush_ypg": 105.6, "rush_ypg_allowed": 103.7, "pass_ypg": 237.4, "pass_ypg_allowed": 225.2, "ppg": 20.3, "ppg_against": 21.4, "completion_pct": 69.9}, {"season": 2024, "team": "MIN", "points_for": 432, "points_against": 332, "games_played": 17, "rush_yards": 1855, "rush_tds": 9, "rush_carries": 457, "pass_yards": 4357, "pass_tds": 35, "pass_attempts": 547, "completions": 363, "interceptions": 12, "pass_epa": 54.49647629402797, "rush_yards_allowed": 1588, "rush_tds_allowed": 12, "pass_yards_allowed": 4446, "pass_tds_allowed": 24, "interceptions_forced": 24, "rush_ypg": 109.1, "rush_ypg_allowed": 93.4, "pass_ypg": 256.3, "pass_ypg_allowed": 261.5, "ppg": 25.4, "ppg_against": 19.5, "completion_pct": 66.4}, {"season": 2024, "team": "NE", "points_for": 289, "points_against": 417, "games_played": 17, "rush_yards": 1969, "rush_tds": 11, "rush_carries": 446, "pass_yards": 3343, "pass_tds": 18, "pass_attempts": 528, "completions": 342, "interceptions": 11, "pass_epa": -51.777271552069806, "rush_yards_allowed": 2233, "rush_tds_allowed": 16, "pass_yards_allowed": 3749, "pass_tds_allowed": 27, "interceptions_forced": 7, "rush_ypg": 115.8, "rush_ypg_allowed": 131.4, "pass_ypg": 196.6, "pass_ypg_allowed": 220.5, "ppg": 17.0, "ppg_against": 24.5, "completion_pct": 64.8}, {"season": 2024, "team": "NO", "points_for": 338, "points_against": 398, "games_played": 17, "rush_yards": 1954, "rush_tds": 15, "rush_carries": 444, "pass_yards": 3688, "pass_tds": 20, "pass_attempts": 546, "completions": 337, "interceptions": 11, "pass_epa": -43.11843103432719, "rush_yards_allowed": 2404, "rush_tds_allowed": 20, "pass_yards_allowed": 4295, "pass_tds_allowed": 19, "interceptions_forced": 14, "rush_ypg": 114.9, "rush_ypg_allowed": 141.4, "pass_ypg": 216.9, "pass_ypg_allowed": 252.6, "ppg": 19.9, "ppg_against": 23.4, "completion_pct": 61.7}, {"season": 2024, "team": "NYG", "points_for": 273, "points_against": 415, "games_played": 17, "rush_yards": 1783, "rush_tds": 13, "rush_carries": 424, "pass_yards": 3521, "pass_tds": 15, "pass_attempts": 590, "completions": 366, "interceptions": 13, "pass_epa": -95.1848962613801, "rush_yards_allowed": 2316, "rush_tds_allowed": 18, "pass_yards_allowed": 3869, "pass_tds_allowed": 23, "interceptions_forced": 5, "rush_ypg": 104.9, "rush_ypg_allowed": 136.2, "pass_ypg": 207.1, "pass_ypg_allowed": 227.6, "ppg": 16.1, "ppg_against": 24.4, "completion_pct": 62.0}, {"season": 2024, "team": "NYJ", "points_for": 338, "points_against": 404, "games_played": 17, "rush_yards": 1561, "rush_tds": 8, "rush_carries": 363, "pass_yards": 4016, "pass_tds": 31, "pass_attempts": 606, "completions": 385, "interceptions": 11, "pass_epa": 22.35307958095158, "rush_yards_allowed": 2059, "rush_tds_allowed": 22, "pass_yards_allowed": 3588, "pass_tds_allowed": 18, "interceptions_forced": 7, "rush_ypg": 91.8, "rush_ypg_allowed": 121.1, "pass_ypg": 236.2, "pass_ypg_allowed": 211.1, "ppg": 19.9, "ppg_against": 23.8, "completion_pct": 63.5}, {"season": 2024, "team": "PHI", "points_for": 463, "points_against": 303, "games_played": 17, "rush_yards": 3048, "rush_tds": 29, "rush_carries": 621, "pass_yards": 3517, "pass_tds": 24, "pass_attempts": 448, "completions": 303, "interceptions": 6, "pass_epa": 58.53059137812155, "rush_yards_allowed": 1771, "rush_tds_allowed": 9, "pass_yards_allowed": 3266, "pass_tds_allowed": 22, "interceptions_forced": 13, "rush_ypg": 179.3, "rush_ypg_allowed": 104.2, "pass_ypg": 206.9, "pass_ypg_allowed": 192.1, "ppg": 27.2, "ppg_against": 17.8, "completion_pct": 67.6}, {"season": 2024, "team": "PIT", "points_for": 380, "points_against": 347, "games_played": 17, "rush_yards": 2166, "rush_tds": 14, "rush_carries": 533, "pass_yards": 3607, "pass_tds": 21, "pass_attempts": 498, "completions": 321, "interceptions": 6, "pass_epa": 7.113910411057555, "rush_yards_allowed": 1678, "rush_tds_allowed": 14, "pass_yards_allowed": 4151, "pass_tds_allowed": 23, "interceptions_forced": 17, "rush_ypg": 127.4, "rush_ypg_allowed": 98.7, "pass_ypg": 212.2, "pass_ypg_allowed": 244.2, "ppg": 22.4, "ppg_against": 20.4, "completion_pct": 64.5}, {"season": 2024, "team": "SEA", "points_for": 375, "points_against": 368, "games_played": 17, "rush_yards": 1627, "rush_tds": 17, "rush_carries": 383, "pass_yards": 4344, "pass_tds": 21, "pass_attempts": 592, "completions": 412, "interceptions": 16, "pass_epa": 6.180178076324428, "rush_yards_allowed": 2053, "rush_tds_allowed": 11, "pass_yards_allowed": 3923, "pass_tds_allowed": 25, "interceptions_forced": 13, "rush_ypg": 95.7, "rush_ypg_allowed": 120.8, "pass_ypg": 255.5, "pass_ypg_allowed": 230.8, "ppg": 22.1, "ppg_against": 21.6, "completion_pct": 69.6}, {"season": 2024, "team": "SF", "points_for": 389, "points_against": 436, "games_played": 17, "rush_yards": 2163, "rush_tds": 17, "rush_carries": 457, "pass_yards": 4424, "pass_tds": 23, "pass_attempts": 532, "completions": 349, "interceptions": 16, "pass_epa": 70.98597599604577, "rush_yards_allowed": 2118, "rush_tds_allowed": 24, "pass_yards_allowed": 3476, "pass_tds_allowed": 25, "interceptions_forced": 11, "rush_ypg": 127.2, "rush_ypg_allowed": 124.6, "pass_ypg": 260.2, "pass_ypg_allowed": 204.5, "ppg": 22.9, "ppg_against": 25.6, "completion_pct": 65.6}, {"season": 2024, "team": "TB", "points_for": 502, "points_against": 385, "games_played": 17, "rush_yards": 2536, "rush_tds": 16, "rush_carries": 483, "pass_yards": 4505, "pass_tds": 41, "pass_attempts": 571, "completions": 408, "interceptions": 16, "pass_epa": 115.68643922132298, "rush_yards_allowed": 1663, "rush_tds_allowed": 13, "pass_yards_allowed": 4447, "pass_tds_allowed": 27, "interceptions_forced": 7, "rush_ypg": 149.2, "rush_ypg_allowed": 97.8, "pass_ypg": 265.0, "pass_ypg_allowed": 261.6, "ppg": 29.5, "ppg_against": 22.6, "completion_pct": 71.5}, {"season": 2024, "team": "TEN", "points_for": 311, "points_against": 460, "games_played": 17, "rush_yards": 1855, "rush_tds": 11, "rush_carries": 450, "pass_yards": 3621, "pass_tds": 22, "pass_attempts": 529, "completions": 336, "interceptions": 21, "pass_epa": -66.402073286752, "rush_yards_allowed": 2277, "rush_tds_allowed": 21, "pass_yards_allowed": 3213, "pass_tds_allowed": 26, "interceptions_forced": 11, "rush_ypg": 109.1, "rush_ypg_allowed": 133.9, "pass_ypg": 213.0, "pass_ypg_allowed": 189.0, "ppg": 18.3, "ppg_against": 27.1, "completion_pct": 63.5}, {"season": 2024, "team": "WAS", "points_for": 485, "points_against": 391, "games_played": 17, "rush_yards": 2619, "rush_tds": 25, "rush_carries": 526, "pass_yards": 3932, "pass_tds": 29, "pass_attempts": 524, "completions": 365, "interceptions": 9, "pass_epa": 79.72100276005364, "rush_yards_allowed": 2337, "rush_tds_allowed": 18, "pass_yards_allowed": 3471, "pass_tds_allowed": 24, "interceptions_forced": 7, "rush_ypg": 154.1, "rush_ypg_allowed": 137.5, "pass_ypg": 231.3, "pass_ypg_allowed": 204.2, "ppg": 28.5, "ppg_against": 23.0, "completion_pct": 69.7}, {"season": 2025, "team": "ARI", "points_for": 355, "points_against": 488, "games_played": 17, "rush_yards": 1583, "rush_tds": 9, "rush_carries": 366, "pass_yards": 4326, "pass_tds": 29, "pass_attempts": 648, "completions": 426, "interceptions": 11, "pass_epa": 0.35852835693787144, "rush_yards_allowed": 2158, "rush_tds_allowed": 19, "pass_yards_allowed": 4128, "pass_tds_allowed": 31, "interceptions_forced": 10, "rush_ypg": 93.1, "rush_ypg_allowed": 126.9, "pass_ypg": 254.5, "pass_ypg_allowed": 242.8, "ppg": 20.9, "ppg_against": 28.7, "completion_pct": 65.7}, {"season": 2025, "team": "ATL", "points_for": 353, "points_against": 401, "games_played": 17, "rush_yards": 2138, "rush_tds": 17, "rush_carries": 477, "pass_yards": 3703, "pass_tds": 19, "pass_attempts": 545, "completions": 332, "interceptions": 8, "pass_epa": 4.209096397094655, "rush_yards_allowed": 2146, "rush_tds_allowed": 12, "pass_yards_allowed": 3773, "pass_tds_allowed": 27, "interceptions_forced": 16, "rush_ypg": 125.8, "rush_ypg_allowed": 126.2, "pass_ypg": 217.8, "pass_ypg_allowed": 221.9, "ppg": 20.8, "ppg_against": 23.6, "completion_pct": 60.9}, {"season": 2025, "team": "BAL", "points_for": 424, "points_against": 398, "games_played": 17, "rush_yards": 2662, "rush_tds": 23, "rush_carries": 507, "pass_yards": 3278, "pass_tds": 23, "pass_attempts": 421, "completions": 278, "interceptions": 11, "pass_epa": 4.969333194613392, "rush_yards_allowed": 1813, "rush_tds_allowed": 18, "pass_yards_allowed": 4403, "pass_tds_allowed": 23, "interceptions_forced": 11, "rush_ypg": 156.6, "rush_ypg_allowed": 106.6, "pass_ypg": 192.8, "pass_ypg_allowed": 259.0, "ppg": 24.9, "ppg_against": 23.4, "completion_pct": 66.0}, {"season": 2025, "team": "BUF", "points_for": 481, "points_against": 365, "games_played": 17, "rush_yards": 2714, "rush_tds": 30, "rush_carries": 547, "pass_yards": 3981, "pass_tds": 29, "pass_attempts": 495, "completions": 344, "interceptions": 10, "pass_epa": 97.06081157919405, "rush_yards_allowed": 2315, "rush_tds_allowed": 24, "pass_yards_allowed": 2894, "pass_tds_allowed": 19, "interceptions_forced": 12, "rush_ypg": 159.6, "rush_ypg_allowed": 136.2, "pass_ypg": 234.2, "pass_ypg_allowed": 170.2, "ppg": 28.3, "ppg_against": 21.5, "completion_pct": 69.5}, {"season": 2025, "team": "CAR", "points_for": 311, "points_against": 380, "games_played": 17, "rush_yards": 1977, "rush_tds": 9, "rush_carries": 461, "pass_yards": 3304, "pass_tds": 24, "pass_attempts": 515, "completions": 329, "interceptions": 12, "pass_epa": -27.63458678505455, "rush_yards_allowed": 2096, "rush_tds_allowed": 20, "pass_yards_allowed": 3657, "pass_tds_allowed": 20, "interceptions_forced": 15, "rush_ypg": 116.3, "rush_ypg_allowed": 123.3, "pass_ypg": 194.4, "pass_ypg_allowed": 215.1, "ppg": 18.3, "ppg_against": 22.4, "completion_pct": 63.9}, {"season": 2025, "team": "CHI", "points_for": 441, "points_against": 415, "games_played": 17, "rush_yards": 2451, "rush_tds": 19, "rush_carries": 505, "pass_yards": 3989, "pass_tds": 27, "pass_attempts": 572, "completions": 333, "interceptions": 7, "pass_epa": 44.5224783715344, "rush_yards_allowed": 2287, "rush_tds_allowed": 15, "pass_yards_allowed": 4067, "pass_tds_allowed": 32, "interceptions_forced": 23, "rush_ypg": 144.2, "rush_ypg_allowed": 134.5, "pass_ypg": 234.6, "pass_ypg_allowed": 239.2, "ppg": 25.9, "ppg_against": 24.4, "completion_pct": 58.2}, {"season": 2025, "team": "CIN", "points_for": 414, "points_against": 492, "games_played": 17, "rush_yards": 1591, "rush_tds": 11, "rush_carries": 381, "pass_yards": 4244, "pass_tds": 36, "pass_attempts": 640, "completions": 412, "interceptions": 17, "pass_epa": 13.347914985647936, "rush_yards_allowed": 2500, "rush_tds_allowed": 18, "pass_yards_allowed": 4166, "pass_tds_allowed": 30, "interceptions_forced": 13, "rush_ypg": 93.6, "rush_ypg_allowed": 147.1, "pass_ypg": 249.6, "pass_ypg_allowed": 245.1, "ppg": 24.4, "ppg_against": 28.9, "completion_pct": 64.4}, {"season": 2025, "team": "CLE", "points_for": 279, "points_against": 379, "games_played": 17, "rush_yards": 1649, "rush_tds": 10, "rush_carries": 421, "pass_yards": 3152, "pass_tds": 16, "pass_attempts": 557, "completions": 323, "interceptions": 18, "pass_epa": -161.43577998647186, "rush_yards_allowed": 1979, "rush_tds_allowed": 14, "pass_yards_allowed": 3188, "pass_tds_allowed": 24, "interceptions_forced": 11, "rush_ypg": 97.0, "rush_ypg_allowed": 116.4, "pass_ypg": 185.4, "pass_ypg_allowed": 187.5, "ppg": 16.4, "ppg_against": 22.3, "completion_pct": 58.0}, {"season": 2025, "team": "DAL", "points_for": 471, "points_against": 511, "games_played": 17, "rush_yards": 2136, "rush_tds": 18, "rush_carries": 465, "pass_yards": 4735, "pass_tds": 31, "pass_attempts": 624, "completions": 419, "interceptions": 12, "pass_epa": 113.9334655651819, "rush_yards_allowed": 2133, "rush_tds_allowed": 24, "pass_yards_allowed": 4521, "pass_tds_allowed": 35, "interceptions_forced": 6, "rush_ypg": 125.6, "rush_ypg_allowed": 125.5, "pass_ypg": 278.5, "pass_ypg_allowed": 265.9, "ppg": 27.7, "ppg_against": 30.1, "completion_pct": 67.1}, {"season": 2025, "team": "DEN", "points_for": 401, "points_against": 311, "games_played": 17, "rush_yards": 2018, "rush_tds": 18, "rush_carries": 456, "pass_yards": 3931, "pass_tds": 25, "pass_attempts": 612, "completions": 388, "interceptions": 11, "pass_epa": 63.32275760694129, "rush_yards_allowed": 1548, "rush_tds_allowed": 11, "pass_yards_allowed": 3606, "pass_tds_allowed": 18, "interceptions_forced": 10, "rush_ypg": 118.7, "rush_ypg_allowed": 91.1, "pass_ypg": 231.2, "pass_ypg_allowed": 212.1, "ppg": 23.6, "ppg_against": 18.3, "completion_pct": 63.4}, {"season": 2025, "team": "DET", "points_for": 481, "points_against": 413, "games_played": 17, "rush_yards": 2041, "rush_tds": 21, "rush_carries": 442, "pass_yards": 4564, "pass_tds": 34, "pass_attempts": 580, "completions": 393, "interceptions": 8, "pass_epa": 105.10488587189828, "rush_yards_allowed": 1947, "rush_tds_allowed": 16, "pass_yards_allowed": 3994, "pass_tds_allowed": 30, "interceptions_forced": 13, "rush_ypg": 120.1, "rush_ypg_allowed": 114.5, "pass_ypg": 268.5, "pass_ypg_allowed": 234.9, "ppg": 28.3, "ppg_against": 24.3, "completion_pct": 67.8}, {"season": 2025, "team": "GB", "points_for": 391, "points_against": 360, "games_played": 17, "rush_yards": 2037, "rush_tds": 18, "rush_carries": 492, "pass_yards": 3845, "pass_tds": 26, "pass_attempts": 489, "completions": 328, "interceptions": 7, "pass_epa": 118.79636839653993, "rush_yards_allowed": 2001, "rush_tds_allowed": 15, "pass_yards_allowed": 3516, "pass_tds_allowed": 24, "interceptions_forced": 7, "rush_ypg": 119.8, "rush_ypg_allowed": 117.7, "pass_ypg": 226.2, "pass_ypg_allowed": 206.8, "ppg": 23.0, "ppg_against": 21.2, "completion_pct": 67.1}, {"season": 2025, "team": "HOU", "points_for": 404, "points_against": 295, "games_played": 17, "rush_yards": 1852, "rush_tds": 9, "rush_carries": 475, "pass_yards": 3956, "pass_tds": 24, "pass_attempts": 582, "completions": 364, "interceptions": 9, "pass_epa": 30.940926408704808, "rush_yards_allowed": 1593, "rush_tds_allowed": 13, "pass_yards_allowed": 3470, "pass_tds_allowed": 20, "interceptions_forced": 18, "rush_ypg": 108.9, "rush_ypg_allowed": 93.7, "pass_ypg": 232.7, "pass_ypg_allowed": 204.1, "ppg": 23.8, "ppg_against": 17.4, "completion_pct": 62.5}, {"season": 2025, "team": "IND", "points_for": 466, "points_against": 412, "games_played": 17, "rush_yards": 2007, "rush_tds": 27, "rush_carries": 442, "pass_yards": 4069, "pass_tds": 25, "pass_attempts": 545, "completions": 359, "interceptions": 14, "pass_epa": 44.62221097485744, "rush_yards_allowed": 1732, "rush_tds_allowed": 16, "pass_yards_allowed": 4462, "pass_tds_allowed": 24, "interceptions_forced": 14, "rush_ypg": 118.1, "rush_ypg_allowed": 101.9, "pass_ypg": 239.4, "pass_ypg_allowed": 262.5, "ppg": 27.4, "ppg_against": 24.2, "completion_pct": 65.9}, {"season": 2025, "team": "JAX", "points_for": 474, "points_against": 336, "games_played": 17, "rush_yards": 1956, "rush_tds": 22, "rush_carries": 489, "pass_yards": 4026, "pass_tds": 29, "pass_attempts": 563, "completions": 344, "interceptions": 12, "pass_epa": 41.309487587430226, "rush_yards_allowed": 1455, "rush_tds_allowed": 13, "pass_yards_allowed": 3933, "pass_tds_allowed": 25, "interceptions_forced": 22, "rush_ypg": 115.1, "rush_ypg_allowed": 85.6, "pass_ypg": 236.8, "pass_ypg_allowed": 231.4, "ppg": 27.9, "ppg_against": 19.8, "completion_pct": 61.1}, {"season": 2025, "team": "KC", "points_for": 362, "points_against": 328, "games_played": 17, "rush_yards": 1812, "rush_tds": 15, "rush_carries": 430, "pass_yards": 3947, "pass_tds": 23, "pass_attempts": 584, "completions": 363, "interceptions": 12, "pass_epa": 24.883655681429083, "rush_yards_allowed": 1797, "rush_tds_allowed": 14, "pass_yards_allowed": 3487, "pass_tds_allowed": 18, "interceptions_forced": 10, "rush_ypg": 106.6, "rush_ypg_allowed": 105.7, "pass_ypg": 232.2, "pass_ypg_allowed": 205.1, "ppg": 21.3, "ppg_against": 19.3, "completion_pct": 62.2}, {"season": 2025, "team": "LA", "points_for": 518, "points_against": 346, "games_played": 17, "rush_yards": 2152, "rush_tds": 17, "rush_carries": 465, "pass_yards": 4707, "pass_tds": 46, "pass_attempts": 597, "completions": 388, "interceptions": 8, "pass_epa": 150.45430748211436, "rush_yards_allowed": 1884, "rush_tds_allowed": 8, "pass_yards_allowed": 3960, "pass_tds_allowed": 26, "interceptions_forced": 16, "rush_ypg": 126.6, "rush_ypg_allowed": 110.8, "pass_ypg": 276.9, "pass_ypg_allowed": 232.9, "ppg": 30.5, "ppg_against": 20.4, "completion_pct": 65.0}, {"season": 2025, "team": "LAC", "points_for": 368, "points_against": 340, "games_played": 17, "rush_yards": 2067, "rush_tds": 10, "rush_carries": 466, "pass_yards": 3953, "pass_tds": 26, "pass_attempts": 569, "completions": 367, "interceptions": 14, "pass_epa": -23.35207905811383, "rush_yards_allowed": 1791, "rush_tds_allowed": 16, "pass_yards_allowed": 3306, "pass_tds_allowed": 16, "interceptions_forced": 19, "rush_ypg": 121.6, "rush_ypg_allowed": 105.4, "pass_ypg": 232.5, "pass_ypg_allowed": 194.5, "ppg": 21.6, "ppg_against": 20.0, "completion_pct": 64.5}, {"season": 2025, "team": "LV", "points_for": 241, "points_against": 432, "games_played": 17, "rush_yards": 1317, "rush_tds": 5, "rush_carries": 369, "pass_yards": 3315, "pass_tds": 20, "pass_attempts": 515, "completions": 340, "interceptions": 19, "pass_epa": -107.57279016847852, "rush_yards_allowed": 1986, "rush_tds_allowed": 22, "pass_yards_allowed": 3644, "pass_tds_allowed": 23, "interceptions_forced": 8, "rush_ypg": 77.5, "rush_ypg_allowed": 116.8, "pass_ypg": 195.0, "pass_ypg_allowed": 214.4, "ppg": 14.2, "ppg_against": 25.4, "completion_pct": 66.0}, {"season": 2025, "team": "MIA", "points_for": 347, "points_against": 424, "games_played": 17, "rush_yards": 2044, "rush_tds": 14, "rush_carries": 432, "pass_yards": 3314, "pass_tds": 23, "pass_attempts": 478, "completions": 321, "interceptions": 18, "pass_epa": 5.522196793850279, "rush_yards_allowed": 2251, "rush_tds_allowed": 18, "pass_yards_allowed": 3920, "pass_tds_allowed": 29, "interceptions_forced": 9, "rush_ypg": 120.2, "rush_ypg_allowed": 132.4, "pass_ypg": 194.9, "pass_ypg_allowed": 230.6, "ppg": 20.4, "ppg_against": 24.9, "completion_pct": 67.2}, {"season": 2025, "team": "MIN", "points_for": 344, "points_against": 333, "games_played": 17, "rush_yards": 1841, "rush_tds": 15, "rush_carries": 410, "pass_yards": 3176, "pass_tds": 17, "pass_attempts": 483, "completions": 297, "interceptions": 21, "pass_epa": -104.3295718245952, "rush_yards_allowed": 2110, "rush_tds_allowed": 13, "pass_yards_allowed": 3021, "pass_tds_allowed": 15, "interceptions_forced": 8, "rush_ypg": 108.3, "rush_ypg_allowed": 124.1, "pass_ypg": 186.8, "pass_ypg_allowed": 177.7, "ppg": 20.2, "ppg_against": 19.6, "completion_pct": 61.5}, {"season": 2025, "team": "NE", "points_for": 490, "points_against": 320, "games_played": 17, "rush_yards": 2191, "rush_tds": 22, "rush_carries": 494, "pass_yards": 4459, "pass_tds": 31, "pass_attempts": 502, "completions": 361, "interceptions": 8, "pass_epa": 165.08959900686128, "rush_yards_allowed": 1729, "rush_tds_allowed": 11, "pass_yards_allowed": 3509, "pass_tds_allowed": 25, "interceptions_forced": 10, "rush_ypg": 128.9, "rush_ypg_allowed": 101.7, "pass_ypg": 262.3, "pass_ypg_allowed": 206.4, "ppg": 28.8, "ppg_against": 18.8, "completion_pct": 71.9}, {"season": 2025, "team": "NO", "points_for": 306, "points_against": 383, "games_played": 17, "rush_yards": 1603, "rush_tds": 9, "rush_carries": 435, "pass_yards": 3970, "pass_tds": 18, "pass_attempts": 584, "completions": 395, "interceptions": 11, "pass_epa": -19.438009073614875, "rush_yards_allowed": 2050, "rush_tds_allowed": 12, "pass_yards_allowed": 3336, "pass_tds_allowed": 25, "interceptions_forced": 10, "rush_ypg": 94.3, "rush_ypg_allowed": 120.6, "pass_ypg": 233.5, "pass_ypg_allowed": 196.2, "ppg": 18.0, "ppg_against": 22.5, "completion_pct": 67.6}, {"season": 2025, "team": "NYG", "points_for": 381, "points_against": 439, "games_played": 17, "rush_yards": 2195, "rush_tds": 22, "rush_carries": 511, "pass_yards": 3670, "pass_tds": 20, "pass_attempts": 524, "completions": 322, "interceptions": 10, "pass_epa": 3.1346812527795187, "rush_yards_allowed": 2470, "rush_tds_allowed": 21, "pass_yards_allowed": 3889, "pass_tds_allowed": 25, "interceptions_forced": 9, "rush_ypg": 129.1, "rush_ypg_allowed": 145.3, "pass_ypg": 215.9, "pass_ypg_allowed": 228.8, "ppg": 22.4, "ppg_against": 25.8, "completion_pct": 61.5}, {"season": 2025, "team": "NYJ", "points_for": 300, "points_against": 503, "games_played": 17, "rush_yards": 2096, "rush_tds": 11, "rush_carries": 456, "pass_yards": 2777, "pass_tds": 14, "pass_attempts": 491, "completions": 296, "interceptions": 13, "pass_epa": -104.11039446251631, "rush_yards_allowed": 2371, "rush_tds_allowed": 20, "pass_yards_allowed": 3811, "pass_tds_allowed": 35, "interceptions_forced": 0, "rush_ypg": 123.3, "rush_ypg_allowed": 139.5, "pass_ypg": 163.4, "pass_ypg_allowed": 224.2, "ppg": 17.6, "ppg_against": 29.6, "completion_pct": 60.3}, {"season": 2025, "team": "PHI", "points_for": 379, "points_against": 325, "games_played": 17, "rush_yards": 1988, "rush_tds": 17, "rush_carries": 478, "pass_yards": 3498, "pass_tds": 26, "pass_attempts": 497, "completions": 318, "interceptions": 7, "pass_epa": 31.852505132020077, "rush_yards_allowed": 2115, "rush_tds_allowed": 20, "pass_yards_allowed": 3476, "pass_tds_allowed": 14, "interceptions_forced": 12, "rush_ypg": 116.9, "rush_ypg_allowed": 124.4, "pass_ypg": 205.8, "pass_ypg_allowed": 204.5, "ppg": 22.3, "ppg_against": 19.1, "completion_pct": 64.0}, {"season": 2025, "team": "PIT", "points_for": 397, "points_against": 387, "games_played": 17, "rush_yards": 1756, "rush_tds": 16, "rush_carries": 407, "pass_yards": 3632, "pass_tds": 26, "pass_attempts": 550, "completions": 365, "interceptions": 9, "pass_epa": 29.334570500773776, "rush_yards_allowed": 1922, "rush_tds_allowed": 10, "pass_yards_allowed": 4437, "pass_tds_allowed": 30, "interceptions_forced": 15, "rush_ypg": 103.3, "rush_ypg_allowed": 113.1, "pass_ypg": 213.6, "pass_ypg_allowed": 261.0, "ppg": 23.4, "ppg_against": 22.8, "completion_pct": 66.4}, {"season": 2025, "team": "SEA", "points_for": 483, "points_against": 292, "games_played": 17, "rush_yards": 2096, "rush_tds": 19, "rush_carries": 507, "pass_yards": 4063, "pass_tds": 25, "pass_attempts": 480, "completions": 325, "interceptions": 14, "pass_epa": 73.68474431843394, "rush_yards_allowed": 1563, "rush_tds_allowed": 9, "pass_yards_allowed": 3619, "pass_tds_allowed": 20, "interceptions_forced": 18, "rush_ypg": 123.3, "rush_ypg_allowed": 91.9, "pass_ypg": 239.0, "pass_ypg_allowed": 212.9, "ppg": 28.4, "ppg_against": 17.2, "completion_pct": 67.7}, {"season": 2025, "team": "SF", "points_for": 437, "points_against": 371, "games_played": 17, "rush_yards": 1817, "rush_tds": 15, "rush_carries": 481, "pass_yards": 4318, "pass_tds": 33, "pass_attempts": 573, "completions": 398, "interceptions": 16, "pass_epa": 107.81505985730101, "rush_yards_allowed": 1833, "rush_tds_allowed": 13, "pass_yards_allowed": 4110, "pass_tds_allowed": 29, "interceptions_forced": 6, "rush_ypg": 106.9, "rush_ypg_allowed": 107.8, "pass_ypg": 254.0, "pass_ypg_allowed": 241.8, "ppg": 25.7, "ppg_against": 21.8, "completion_pct": 69.5}, {"season": 2025, "team": "TB", "points_for": 380, "points_against": 411, "games_played": 17, "rush_yards": 1947, "rush_tds": 13, "rush_carries": 472, "pass_yards": 3755, "pass_tds": 26, "pass_attempts": 558, "completions": 351, "interceptions": 11, "pass_epa": -11.820976122392981, "rush_yards_allowed": 1684, "rush_tds_allowed": 16, "pass_yards_allowed": 4332, "pass_tds_allowed": 30, "interceptions_forced": 13, "rush_ypg": 114.5, "rush_ypg_allowed": 99.1, "pass_ypg": 220.9, "pass_ypg_allowed": 254.8, "ppg": 22.4, "ppg_against": 24.2, "completion_pct": 62.9}, {"season": 2025, "team": "TEN", "points_for": 284, "points_against": 478, "games_played": 17, "rush_yards": 1589, "rush_tds": 9, "rush_carries": 378, "pass_yards": 3241, "pass_tds": 15, "pass_attempts": 570, "completions": 340, "interceptions": 8, "pass_epa": -133.12214194383415, "rush_yards_allowed": 1948, "rush_tds_allowed": 21, "pass_yards_allowed": 4221, "pass_tds_allowed": 30, "interceptions_forced": 6, "rush_ypg": 93.5, "rush_ypg_allowed": 114.6, "pass_ypg": 190.6, "pass_ypg_allowed": 248.3, "ppg": 16.7, "ppg_against": 28.1, "completion_pct": 59.6}, {"season": 2025, "team": "WAS", "points_for": 356, "points_against": 451, "games_played": 17, "rush_yards": 2290, "rush_tds": 20, "rush_carries": 484, "pass_yards": 3329, "pass_tds": 19, "pass_attempts": 469, "completions": 287, "interceptions": 12, "pass_epa": -5.9095581782320155, "rush_yards_allowed": 2406, "rush_tds_allowed": 18, "pass_yards_allowed": 4371, "pass_tds_allowed": 33, "interceptions_forced": 8, "rush_ypg": 134.7, "rush_ypg_allowed": 141.5, "pass_ypg": 195.8, "pass_ypg_allowed": 257.1, "ppg": 20.9, "ppg_against": 26.5, "completion_pct": 61.2}];
+</script>
+<script>
+// ── TEAM METADATA ────────────────────────────────────────────────────────
+const TEAM_META = {
+  ARI:{conf:'NFC',div:'NFC West'},  ATL:{conf:'NFC',div:'NFC South'},
+  BAL:{conf:'AFC',div:'AFC North'}, BUF:{conf:'AFC',div:'AFC East'},
+  CAR:{conf:'NFC',div:'NFC South'}, CHI:{conf:'NFC',div:'NFC North'},
+  CIN:{conf:'AFC',div:'AFC North'}, CLE:{conf:'AFC',div:'AFC North'},
+  DAL:{conf:'NFC',div:'NFC East'},  DEN:{conf:'AFC',div:'AFC West'},
+  DET:{conf:'NFC',div:'NFC North'}, GB:{conf:'NFC',div:'NFC North'},
+  HOU:{conf:'AFC',div:'AFC South'}, IND:{conf:'AFC',div:'AFC South'},
+  JAX:{conf:'AFC',div:'AFC South'}, KC:{conf:'AFC',div:'AFC West'},
+  LA:{conf:'NFC',div:'NFC West'},   LAC:{conf:'AFC',div:'AFC West'},
+  LAR:{conf:'NFC',div:'NFC West'},  LV:{conf:'AFC',div:'AFC West'},
+  MIA:{conf:'AFC',div:'AFC East'},  MIN:{conf:'NFC',div:'NFC North'},
+  NE:{conf:'AFC',div:'AFC East'},   NO:{conf:'NFC',div:'NFC South'},
+  NYG:{conf:'NFC',div:'NFC East'},  NYJ:{conf:'AFC',div:'AFC East'},
+  PHI:{conf:'NFC',div:'NFC East'},  PIT:{conf:'AFC',div:'AFC North'},
+  SEA:{conf:'NFC',div:'NFC West'},  SF:{conf:'NFC',div:'NFC West'},
+  TB:{conf:'NFC',div:'NFC South'},  TEN:{conf:'AFC',div:'AFC South'},
+  WAS:{conf:'NFC',div:'NFC East'}
+};
+
+// ── CATEGORY CONFIGS ────────────────────────────────────────────────────
+const CATS = {
+  scoring: {
+    label: 'Scoring',
+    layout: 'dual',
+    left: {
+      title: 'Points For', subtitle: 'Total points scored',
+      field: 'points_for', perGame: 'ppg',
+      barField: 'ppg', barMax: 35, barClass: 'bar-scoring-good',
+      sortDir: 'desc', higherBetter: true,
+      cols: [
+        { label: 'PF', field: 'points_for', isPrimary: true },
+        { label: 'PPG', field: 'ppg' },
+        { label: 'Pass TD', field: 'pass_tds' },
+        { label: 'Rush TD', field: 'rush_tds' }
+      ]
+    },
+    right: {
+      title: 'Points Against', subtitle: 'Total points allowed',
+      field: 'points_against', perGame: 'ppg_against',
+      barField: 'ppg_against', barMax: 35, barClass: 'bar-scoring-bad',
+      sortDir: 'asc', higherBetter: false,
+      cols: [
+        { label: 'PA', field: 'points_against', isPrimary: true },
+        { label: 'PPG vs', field: 'ppg_against' },
+        { label: 'Pass TD Allowed', field: 'pass_tds_allowed' },
+        { label: 'Rush TD Allowed', field: 'rush_tds_allowed' }
+      ]
+    }
+  },
+  rush_off: {
+    label: 'Rush Offense',
+    layout: 'single',
+    title: 'Rushing Offense', subtitle: 'Rushing yards per game',
+    sortField: 'rush_ypg', sortDir: 'desc',
+    barField: 'rush_ypg', barMax: 200, barClass: 'bar-offense',
+    cols: [
+      { label: 'YPG', field: 'rush_ypg', isPrimary: true },
+      { label: 'Total Yds', field: 'rush_yards' },
+      { label: 'TDs', field: 'rush_tds' },
+      { label: 'Carries', field: 'rush_carries' },
+      { label: 'YPC', compute: r => r.rush_carries > 0 ? (r.rush_yards / r.rush_carries).toFixed(1) : '—' }
+    ]
+  },
+  pass_off: {
+    label: 'Pass Offense',
+    layout: 'single',
+    title: 'Passing Offense', subtitle: 'Passing yards per game',
+    sortField: 'pass_ypg', sortDir: 'desc',
+    barField: 'pass_ypg', barMax: 320, barClass: 'bar-offense',
+    cols: [
+      { label: 'YPG', field: 'pass_ypg', isPrimary: true },
+      { label: 'Total Yds', field: 'pass_yards' },
+      { label: 'TDs', field: 'pass_tds' },
+      { label: 'INT', field: 'interceptions' },
+      { label: 'Cmp%', field: 'completion_pct' }
+    ]
+  },
+  rush_def: {
+    label: 'Rush Defense',
+    layout: 'single',
+    title: 'Rushing Defense', subtitle: 'Rushing yards allowed per game (lower = better)',
+    sortField: 'rush_ypg_allowed', sortDir: 'asc',
+    barField: 'rush_ypg_allowed', barMax: 200, barClass: 'bar-defense',
+    cols: [
+      { label: 'YPG Allowed', field: 'rush_ypg_allowed', isPrimary: true },
+      { label: 'Total Allowed', field: 'rush_yards_allowed' },
+      { label: 'TDs Allowed', field: 'rush_tds_allowed' }
+    ]
+  },
+  pass_def: {
+    label: 'Pass Defense',
+    layout: 'single',
+    title: 'Passing Defense', subtitle: 'Passing yards allowed per game (lower = better)',
+    sortField: 'pass_ypg_allowed', sortDir: 'asc',
+    barField: 'pass_ypg_allowed', barMax: 320, barClass: 'bar-defense',
+    cols: [
+      { label: 'YPG Allowed', field: 'pass_ypg_allowed', isPrimary: true },
+      { label: 'Total Allowed', field: 'pass_yards_allowed' },
+      { label: 'TDs Allowed', field: 'pass_tds_allowed' },
+      { label: 'INTs Forced', field: 'interceptions_forced' }
+    ]
+  },
+  turnovers: {
+    label: 'Turnovers',
+    layout: 'dual',
+    left: {
+      title: 'Interceptions Forced', subtitle: 'Defensive INTs',
+      field: 'interceptions_forced', perGame: null,
+      barField: 'interceptions_forced', barMax: 25, barClass: 'bar-defense',
+      sortDir: 'desc', higherBetter: true,
+      cols: [
+        { label: 'INTs Forced', field: 'interceptions_forced', isPrimary: true },
+        { label: 'TD Allowed', field: 'pass_tds_allowed' }
+      ]
+    },
+    right: {
+      title: 'Interceptions Thrown', subtitle: 'Offensive INTs',
+      field: 'interceptions', perGame: null,
+      barField: 'interceptions', barMax: 25, barClass: 'bar-scoring-bad',
+      sortDir: 'asc', higherBetter: false,
+      cols: [
+        { label: 'INTs Thrown', field: 'interceptions', isPrimary: true },
+        { label: 'Pass TDs', field: 'pass_tds' }
+      ]
+    }
+  }
+};
+
+// ── STATE ────────────────────────────────────────────────────────────────
+let activeSeason = 2025;
+let activeCat = 'scoring';
+let activeConf = 'ALL';
+let sortField = null;
+let sortDir = 'desc';
+
+// ── DATA ─────────────────────────────────────────────────────────────────
+const RAW_DATA = TEAM_STATS_DATA;
+
+function getFilteredData() {
+  return RAW_DATA.filter(d => {
+    if (d.season !== activeSeason) return false;
+    if (activeConf !== 'ALL') {
+      const meta = TEAM_META[d.team];
+      if (!meta || meta.conf !== activeConf) return false;
+    }
+    return true;
+  });
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────
+function render() {
+  const cat = CATS[activeCat];
+  const wrap = document.getElementById('rankingsWrap');
+
+  if (cat.layout === 'dual') {
+    wrap.innerHTML = renderDual(cat, getFilteredData());
+  } else {
+    wrap.innerHTML = renderSingle(cat, getFilteredData());
+  }
+  attachSortHandlers();
+}
+
+function renderSingle(cat, data) {
+  const sorted = sortData(data, sortField || cat.sortField, sortDir || cat.sortDir);
+  return `
+    <div class="stat-title-bar">
+      <div class="stat-title">${cat.title}</div>
+      <div class="stat-subtitle">${cat.subtitle}</div>
+    </div>
+    ${buildTable(sorted, cat.cols, cat.barField, cat.barMax, cat.barClass, sortField || cat.sortField, sortDir || cat.sortDir)}
+  `;
+}
+
+function renderDual(cat, data) {
+  const leftSorted = sortData(data, cat.left.field, cat.left.sortDir);
+  const rightSorted = sortData(data, cat.right.field, cat.right.sortDir);
+  return `
+    <div class="dual-tables">
+      <div class="table-panel offense">
+        <h3>${cat.left.title} <span style="font-weight:300;color:var(--muted);font-size:12px;">${cat.left.subtitle}</span></h3>
+        ${buildTable(leftSorted, cat.left.cols, cat.left.barField, cat.left.barMax, cat.left.barClass, cat.left.field, cat.left.sortDir, cat.left.higherBetter)}
+      </div>
+      <div class="table-panel defense">
+        <h3>${cat.right.title} <span style="font-weight:300;color:var(--muted);font-size:12px;">${cat.right.subtitle}</span></h3>
+        ${buildTable(rightSorted, cat.right.cols, cat.right.barField, cat.right.barMax, cat.right.barClass, cat.right.field, cat.right.sortDir, cat.right.higherBetter)}
+      </div>
+    </div>
+  `;
+}
+
+function buildTable(rows, cols, barField, barMax, barClass, primaryField, dir, higherBetter = true) {
+  const headerCells = cols.map(c => {
+    const isPrimary = c.field === primaryField || c.label === cols.find(x => x.isPrimary)?.label;
+    const sortCls = c.field === primaryField ? (dir === 'desc' ? 'sort-desc' : 'sort-asc') : '';
+    const primCls = c.isPrimary ? 'primary-col' : '';
+    return `<th class="${sortCls} ${primCls}" data-field="${c.field || ''}">${c.label}</th>`;
+  }).join('');
+
+  const bodyRows = rows.map((row, i) => {
+    const rank = i + 1;
+    const rankCls = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
+    const meta = TEAM_META[row.team] || { conf: '?', div: '?' };
+    const confCls = meta.conf === 'AFC' ? 'conf-afc' : 'conf-nfc';
+    const barVal = row[barField] || 0;
+    const barPct = Math.min(100, (barVal / barMax) * 100);
+
+    const dataCells = cols.map(c => {
+      if (c.isPrimary) {
+        return `<td>
+          <div class="primary-val">${c.compute ? c.compute(row) : (row[c.field] ?? '—')}</div>
+          <div class="bar-cell">
+            <div class="stat-bar-bg">
+              <div class="stat-bar-fill ${barClass}" style="width:${barPct}%"></div>
+            </div>
+          </div>
+        </td>`;
+      }
+      const val = c.compute ? c.compute(row) : (row[c.field] ?? '—');
+      return `<td class="secondary-val">${val}</td>`;
+    }).join('');
+
+    return `<tr>
+      <td class="rank-cell ${rankCls}">${rank}</td>
+      <td>
+        <div class="team-cell">
+          <span class="team-abbr">${row.team}</span>
+          <span class="conf-badge ${confCls}">${meta.conf}</span>
+        </div>
+      </td>
+      ${dataCells}
+    </tr>`;
+  }).join('');
+
+  return `
+    <table class="rankings-table" data-bar-field="${barField}" data-bar-max="${barMax}" data-bar-class="${barClass}">
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th>Team</th>
+          ${headerCells}
+        </tr>
+      </thead>
+      <tbody>${bodyRows}</tbody>
+    </table>
+  `;
+}
+
+function sortData(data, field, dir) {
+  return [...data].sort((a, b) => {
+    const av = a[field] ?? 0;
+    const bv = b[field] ?? 0;
+    return dir === 'desc' ? bv - av : av - bv;
+  });
+}
+
+function attachSortHandlers() {
+  document.querySelectorAll('.rankings-table th[data-field]').forEach(th => {
+    if (!th.dataset.field) return;
+    th.style.cursor = 'pointer';
+    th.addEventListener('click', () => {
+      const f = th.dataset.field;
+      if (!f) return;
+      if (sortField === f) {
+        sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+      } else {
+        sortField = f;
+        const cat = CATS[activeCat];
+        sortDir = cat.layout === 'single' ? cat.sortDir : 'desc';
+      }
+      render();
+    });
+  });
+}
+
+// ── EVENT LISTENERS ──────────────────────────────────────────────────────
+document.getElementById('seasonTabs').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  activeSeason = parseInt(btn.dataset.season);
+  sortField = null;
+  document.querySelectorAll('#seasonTabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+});
+
+document.getElementById('confFilter').addEventListener('change', e => {
+  activeConf = e.target.value;
+  render();
+});
+
+document.getElementById('categoryBar').addEventListener('click', e => {
+  const btn = e.target.closest('.cat-tab');
+  if (!btn) return;
+  activeCat = btn.dataset.cat;
+  sortField = null;
+  sortDir = CATS[activeCat].sortDir || 'desc';
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+});
+
+// ── INIT ─────────────────────────────────────────────────────────────────
+render();
+</script>
+
+<script>
+// ── INLINE DATA (replace with actual JSON content) ───────────────────────
+// This script tag loads team_stats_data inline.
+// The TEAM_STATS_DATA variable above needs to be defined BEFORE the main script.
+// Move this block ABOVE the main <script> tag when embedding your JSON.
+</script>
+
+</body>
+</html>
