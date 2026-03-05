@@ -43,7 +43,7 @@
     z-index: 100;
     height: 52px;
   }
-  .topnav .logo { font-family: 'Oswald', sans-serif; font-size: 18px; font-weight: 700; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; }
+  .topnav .logo { font-family: 'Oswald', sans-serif; font-size: 18px; font-weight: 700; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; text-decoration: none; }
   .topnav .logo span { color: var(--text-dim); font-weight: 400; }
   .nav-links { display: flex; gap: 4px; }
   .nav-link { font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); padding: 6px 14px; border-radius: 4px; cursor: pointer; border: none; background: none; transition: all 0.2s; text-decoration: none; }
@@ -216,11 +216,12 @@
 <body>
 
 <nav class="topnav">
-  <div class="logo">NFL<span>analytics</span></div>
+  <a href="index.html" class="logo">FRANCHISE<span>analytics</span></a>
   <div class="nav-links">
     <a href="nfl-dashboard.html" class="nav-link">Standings</a>
     <a href="nfl-dashboard.html" class="nav-link">Home/Away</a>
     <span class="nav-link active">Props</span>
+    <a href="team-rankings.html" class="nav-link">Team Rankings</a>
   </div>
 </nav>
 

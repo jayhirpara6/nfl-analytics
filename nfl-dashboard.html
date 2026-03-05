@@ -13,7 +13,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'Source Sans 3',sans-serif;min-height:100vh;overflow-x:hidden}
 .topnav{background:rgba(10,14,23,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:32px;position:sticky;top:0;z-index:100;height:52px}
-.logo{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase}
+.logo{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;text-decoration:none}
 .logo span{color:var(--text-dim);font-weight:400}
 .nav-links{display:flex;gap:4px}
 .nav-link{font-family:'Oswald',sans-serif;font-size:13px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);padding:6px 14px;border-radius:4px;cursor:pointer;border:none;background:none;transition:all 0.2s;text-decoration:none}
@@ -91,11 +91,12 @@ table.standings tbody td:nth-child(2){text-align:left;font-weight:600;color:var(
 <body>
 
 <nav class="topnav">
-  <div class="logo">NFL<span>analytics</span></div>
+  <a href="index.html" class="logo">FRANCHISE<span>analytics</span></a>
   <div class="nav-links">
     <span class="nav-link active" id="navStandings" onclick="switchTab('standings')">Standings</span>
     <span class="nav-link" id="navHomeaway" onclick="switchTab('homeaway')">Home/Away</span>
     <a href="player-props.html" class="nav-link">Props</a>
+    <a href="team-rankings.html" class="nav-link">Team Rankings</a>
   </div>
 </nav>
 
