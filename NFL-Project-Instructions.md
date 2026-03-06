@@ -6,7 +6,7 @@ I'm building a football analytics website called **Franchise Analytics** with cu
 ## GitHub Repository
 - **Repo:** https://github.com/jayhirpara6/nfl-analytics
 - **Live site:** https://jayhirpara6.github.io/nfl-analytics/
-- **Pages:** `index.html`, `player-props.html`, `nfl-dashboard.html`, `team-rankings.html`
+- **Pages:** `index.html`, `player-rankings.html`, `team-rankings.html`
 
 ## My Local Setup
 - **Primary machine:** Windows PC (Python 3.12)
@@ -91,14 +91,17 @@ Franchise Analytics Home Page — landing page and navigation hub.
 **Features:**
 - Animated hero section with site title and tagline
 - Stats ticker: 32 teams, 6 seasons, 1,615+ games, 23K+ player logs
-- Three feature cards linking to each tool (Dashboard, Player Props, Team Rankings)
-- Consistent nav bar across all pages with logo linking back to home
+- Two feature cards linking to each tool (Player Rankings, Team Rankings)
+- Nav bar with logo linking to home, and links to Player Rankings and Team Rankings
 - Dark theme with grid background, fade-up animations, card hover effects
+- Player Rankings card: green accent (#22c55e)
+- Team Rankings card: yellow accent (#f59e0b)
 
 ---
 
-### `player-props.html`
-Player Prop Analyzer — data embedded directly in the HTML file.
+### `player-rankings.html`
+Player Rankings — data embedded directly in the HTML file.
+*(Previously named `player-props.html` — renamed and `player-props.html` deleted)*
 
 **Features:**
 - 4 position tabs: QB, RB, WR, TE — each with position-specific stat buttons and game log columns
@@ -114,25 +117,6 @@ Player Prop Analyzer — data embedded directly in the HTML file.
 - Game log: full week-by-week table, most recent first, with YR column for multi-season view
 - Home/Away labels: @KC for away, vsKC for home — on chart, game log, and last 5 dots
 - Leaders table: top 20 players by selected stat/season on default view, click to load player
-
----
-
-### `nfl-dashboard.html`
-Team Dashboard — schedule data embedded directly in the HTML file.
-
-**Tab 1 — Standings:**
-- Season selector: 2020 | 2021 | 2022 | 2023 | 2024 | 2025 (defaults to 2025)
-- Filter by All Teams / AFC / NFC
-- Sortable columns: W, L, T, PCT, PF, PA, DIFF (click header to sort, click again to reverse)
-- When sorted by PCT with All Teams selected, groups by division with division headers
-- PCT shown with a visual bar, DIFF color-coded green/red
-
-**Tab 2 — Home/Away:**
-- Season selector: 2020-2025
-- Show Teams filter: All / AFC / NFC / any division
-- vs Opponent filter: All / AFC / NFC / any division
-- Venue filter: All Games / Home / Away
-- Horizontal bar chart sorted by win %, x-axis fixed at 17
 
 ---
 
@@ -327,7 +311,7 @@ print(f"Exported {len(team_stats)} records")
 ## What's Next (To Be Built)
 - Player comparison mode (view two players side by side)
 - L3 / L5 hit rate split vs full season
-- Opponent-based filtering on props page
+- Opponent-based filtering on player rankings page
 - More chart types and visualizations
 
 ## Important Notes
